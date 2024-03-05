@@ -9,7 +9,7 @@ using namespace std;
 
 //struct node
 typedef struct node{
-    node *next;
+    //node *next;
     int vertex=-1;
     int sup=-1;
     int lowerBound_k=-1;
@@ -22,24 +22,32 @@ typedef struct node{
 class Graph{
     public:
         vector<list<node>> adj;
-        Graph();
+        Graph(){};
 
         // void resize_list(int node_number){
         //     adj.resize(node_number);
         // }
         void addEdge(int u, int v){
-            node* s= new node;
-            s->vertex=v;
-            adj[u].push_back(*s);
-            s->vertex=u;
-            adj[v].push_back(*s);
+            node* s = new node; 
+            s->vertex = v;
+            adj[u].push_back(*s); 
+            s = new node; 
+            s->vertex = u;
+            adj[v].push_back(*s); 
         }
         void removeEdge(int u, int v){
             adj[u].remove_if([v](NODE& n) { return n.vertex == v; });
             adj[v].remove_if([u](NODE& n) { return n.vertex == u; });
         }
+
         void printGraph(){
-            
+            for(int i=0;i< this->adj.size();i++){
+                cout<<i<<" ";
+                for(auto it = this->adj[i].begin(); it != this->adj[i].end(); it++)
+                    cout << it->vertex << " -> ";
+                
+                cout<<"null"<<endl;
+            }
         }
         
         
@@ -66,19 +74,22 @@ bool read_file(string filename ,int *nodes,int *edges,Graph *G_in){
 
         ss >> token;
         if(token == "Nodes"){ //Nodes
-            ss >> *nodes;
-            cout << "Nodes: " << nodes << endl;
+            ss >> (*nodes);
+            G.adj.resize(*nodes);
+            //cout << "Nodes: " << *nodes << endl;
         }
         else if(token == "Edges"){ //Edges
-            ss >> *edges;
-            cout << "Edges: " << edges << endl;
+            ss >> (*edges);
+            //cout << "Edges: " << *edges << endl;
         }
         else {
-            ss >> source >> target;
-            cout << "Source: " << source << " , Target: " << target << endl;
+            source= stoi(token);
+            ss >> target;
+            //cout << "Source: " << source << " , Target: " << target << endl;
             G.addEdge(source,target);
         }    
     }
+    
     *G_in=G;
     return true;
 }
@@ -86,17 +97,15 @@ bool read_file(string filename ,int *nodes,int *edges,Graph *G_in){
 int main(){
     Graph G_input;
     int node_num =0, edge_num =0;
-    string filename="";
+    string filename="./dataset/test.txt";
     if(!read_file(filename,&node_num,&edge_num,&G_input))
         return EXIT_FAILURE;
-   
-    for(int i=0;i< G_input.adj.size();i++){
-        cout<<i<<" ";
-        for(int j=0;j< G_input.adj[i].size();j++){
-            //cout<< G_input.adj[i].<<"->";
-        }
-        cout<<"null"<<endl;
-    }
+    
+
+    cout << "Nodes: " << node_num << endl;
+    cout << "Edges: " << edge_num << endl;
+
+    G_input.printGraph();
 
 
     return 0;
