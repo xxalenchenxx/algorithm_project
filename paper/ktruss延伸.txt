@@ -1,0 +1,13 @@
+提出三個新的演算法
+
+2.定義符號
+3.定義(k,t) truss
+4.high order truss decomposition(HOTdec演算法)
+5.presents our improved algorithms for higher-order truss decomposition problem
+  三個方法
+  (1)delayed update strategy
+  (2)early pruning strategy
+  (3)unchanged support detection strategy
+  (4)基於前面三個優化方法提出--> HOTDecom+
+7.實驗
+8.總結
