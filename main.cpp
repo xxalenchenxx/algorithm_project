@@ -90,6 +90,8 @@ class Graph{
             return;
         }
 
+        
+
     private:
         vector<int> tau_hop_neighbor(int v){
             queue<int> q;
@@ -123,6 +125,12 @@ class Graph{
         
 };
 
+bool check_any_edge(Graph G){
+    for(int i=0; i<G.adj.size(); i++)
+        if(G.adj[i].size())
+            return true; 
+    return false;
+}
 
 bool read_file(string filename ,int *nodes,int *edges,Graph *G_in,int tau){
     ifstream myfile;string str;
@@ -159,6 +167,7 @@ bool read_file(string filename ,int *nodes,int *edges,Graph *G_in,int tau){
     }
     G.tau=tau;
     *G_in=G;
+    
     return true;
 }
 
@@ -168,7 +177,7 @@ int main(){
 
     //-------------------input element----------------------------------
     string filename="./dataset/test.txt";//graph
-    int tau=3;
+    int tau=2;
 
 
     if(!read_file(filename,&node_num,&edge_num,&G_input,tau))
@@ -178,11 +187,14 @@ int main(){
     cout << "Nodes: " << node_num << endl;
     cout << "Edges: " << edge_num << endl;
 
-    G_input.compute_edge_support(0,1);
+    G_input.compute_edge_support(2,1);
     // G_input.printGraph();
-    // G_input.python_draw_graph();
-    
+    //G_input.python_draw_graph();
+    for(int i=0;i<G_input.adj.size();i++)
+        G_input.adj[i].clear();
 
+    G_input.printGraph();
+    cout<<check_any_edge(G_input);
 
 
     return 0;
