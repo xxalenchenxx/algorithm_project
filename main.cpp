@@ -50,6 +50,23 @@ class Graph{
             }
         }
         
+        void python_draw_graph(){
+            ofstream outfile("output.txt");
+            if (outfile.is_open()) {
+                for (int i=0;i< adj.size();i++) {
+                    for(auto it = this->adj[i].begin(); it != this->adj[i].end(); it++)
+                        outfile << i<<" "<< it->vertex<< "\n";
+                }
+                outfile.close();
+            } else {
+                std::cout << "Unable to open file for writing." << std::endl;
+                return;
+            }
+
+            // 呼叫 Python 程式
+            std::string cmd = "python show_graph.py output.txt";
+            system(cmd.c_str());
+        }
         
         
         
@@ -105,8 +122,9 @@ int main(){
     cout << "Nodes: " << node_num << endl;
     cout << "Edges: " << edge_num << endl;
 
+
     G_input.printGraph();
-    //test only
+    G_input.python_draw_graph();
 
     return 0;
 }
