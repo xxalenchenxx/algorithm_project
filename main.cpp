@@ -190,11 +190,11 @@ int main(){
     G_input.compute_edge_support(2,1);
     // G_input.printGraph();
     //G_input.python_draw_graph();
-    for(int i=0;i<G_input.adj.size();i++)
-        G_input.adj[i].clear();
+    
+    //start HOtdecom
+    // while(check_any_edge(G_input)){
 
-    G_input.printGraph();
-    cout<<check_any_edge(G_input);
+    // }
 
 
     return 0;
