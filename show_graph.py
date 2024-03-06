@@ -23,5 +23,5 @@ for i in range(len(u)):
 # 繪製圖形
 nx.draw(G, with_labels=True)
 plt.show()
-plt.pause(0.001)
+
 plt.close()
