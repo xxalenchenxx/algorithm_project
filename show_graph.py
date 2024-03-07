@@ -24,6 +24,6 @@ for i in range(len(u)):
 
 # 繪製圖形
 pos = nx.spring_layout(G, k=1)  # 設置 k 值為較大的值
-nx.draw(G, pos, with_labels=True, node_size=70, node_color='blue', font_size=10)  # 繪製節點
+nx.draw(G, pos, with_labels=True, node_size=70, node_color='skyblue', font_size=9)  # 繪製節點
 nx.draw_networkx_edge_labels(G, pos, edge_labels={(u[i], v[i]): sup[i] for i in range(len(u))})  # 顯示邊的權重
 plt.show()

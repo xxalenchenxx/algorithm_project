@@ -45,7 +45,7 @@ class Graph{
             for(int i=0;i< adj.size();i++){
                 cout<<i<<" ";
                 for(auto it = adj[i].begin(); it != adj[i].end(); it++)
-                    cout << it->vertex << " -> ";
+                    cout << it->vertex <<"("<<it->k<<")"<< " -> ";
                 
                 cout<<"null"<<endl;
             }
@@ -56,7 +56,7 @@ class Graph{
             if (outfile.is_open()) {
                 for (int i=0;i< adj.size();i++) {
                     for(auto it = this->adj[i].begin(); it != this->adj[i].end(); it++)
-                        outfile << i<<" "<< it->vertex<< " "<<it->sup<<"\n";
+                        outfile << i <<" "<< it->vertex<< " "<<it->k<<"\n";
                 }
                 outfile.close();
             } else {
@@ -118,17 +118,19 @@ class Graph{
         vector<EDGE> effect_edge(int u,int v){
             vector<int> Q1, Q2;
             vector<EDGE> edge;
+            
             Q1=tau_hop_neighbor(u);
+            
             Q2=tau_hop_neighbor(v);
             
-            cout<<"\n u neighbors:";
-            for(int i=0; i<Q1.size(); i++)
-                cout<<Q1[i]<<" ";
-            cout<<"\n v neighbors:";
-            for(int i=0; i<Q2.size(); i++)
-                cout<<Q2[i]<<" ";
-
-            cout<<endl;
+            // cout<<"\n u neighbors:";
+            // for(int i=0; i<Q1.size(); i++)
+            //     cout<<Q1[i]<<" ";
+            // cout<<"\n v neighbors:";
+            // for(int i=0; i<Q2.size(); i++)
+            //     cout<<Q2[i]<<" ";
+            
+            //effect nodes
             vector<int> MNN;
             MNN.push_back(u);
             MNN.push_back(v);
@@ -137,19 +139,24 @@ class Graph{
                     if(Q1[i]==Q2[j])
                         MNN.push_back(Q1[i]);   
             }
-
-
+            
+            //find effect node by edge
             for(int i=0; i<MNN.size(); i++)
                 for(int j=0; j<MNN.size(); j++)
                     if((MNN[i]<MNN[j])&&find_edge(MNN[i],MNN[j]))
                         edge.push_back({MNN[i],MNN[j]});
-                
-            
 
-            for(auto it=edge.begin(); it!=edge.end(); it++)
+            // for(int i=0; i<edge.size(); i++){
+            //     cout<<"edge: "<<edge[i].s<<" , "<<edge[i].t<<endl;
+            // }
+            
+            //delete edge(u,v)
+            for(auto it=edge.begin(); it!=edge.end();)
                 if((it->s==u&&it->t==v)||(it->s==v&&it->t==u))
                     it=edge.erase(it);
-   
+                else
+                    it++;
+      
             return edge;
         }
     private:
@@ -270,33 +277,53 @@ int main(){
     //compute_ALL_support
     int min_k=INT32_MAX;
     G_input.compute_ALL_support(&min_k);
-
+    G_input.printGraph();
     Graph graph_adj=G_input;
-    
+
+
+ while(check_any_edge(graph_adj)){
+    cout<<"---------------k="<<min_k+2<<"-----------------"<<endl;   
     int u,v;
     while(edge_smaller_than_k(graph_adj.adj,min_k,&u,&v)){
         vector<EDGE> effect_edge;
+        cout<<"1"<<endl;
         //put k_truss in edge(u,v)
         for(auto it = G_input.adj[u].begin(); it != G_input.adj[u].end(); it++)
-            if(it->vertex=v)
+            if(it->vertex==v)
                 it->k=min_k+2;
+
         for(auto it = G_input.adj[v].begin(); it != G_input.adj[v].end(); it++)
-            if(it->vertex=u)
+            if(it->vertex==u)
                 it->k=min_k+2;
-
-        //G'<-G\e(u,v)
-        Graph graph_before=graph_adj;
-        graph_adj.removeEdge(u,v);
-        cout<<"remove edge: ("<<u<<" , "<<v<<")"<<endl;
-        //effect edge(u,v) after delete u,v
-        effect_edge=graph_before.effect_edge(u,v);
         
-        cout<<"\n effect_edge size: "<<effect_edge.size()<<endl;
-        for(int i=0;i<effect_edge.size();i++){
-            cout<<effect_edge[i].s<<" "<<effect_edge[i].t<<endl;
-        }
-    }
+        //G'<-G\e(u,v)
+        //Graph graph_before=graph_adj;
+        effect_edge=graph_adj.effect_edge(u,v);
+        graph_adj.removeEdge(u,v);
+        
+        
+        //effect edge(u,v) after delete u,v
+        //effect_edge=graph_before.effect_edge(u,v);
+        
+        for(int i=0; i<effect_edge.size(); i++)
+            for(auto it = graph_adj.adj[effect_edge[i].s].begin(); it != graph_adj.adj[effect_edge[i].s].end(); it++)
+                if(it->vertex==effect_edge[i].t && it->sup>min_k)
+                    graph_adj.compute_edge_support(effect_edge[i].s,effect_edge[i].t);
+        
 
+        
+        // cout<<"\n effect_edge size: "<<effect_edge.size()<<endl;
+        // for(int i=0;i<effect_edge.size();i++){
+        //     cout<<effect_edge[i].s<<" "<<effect_edge[i].t<<endl;
+        // }
+    }
+    //graph_adj.python_draw_graph();
+    min_k++;
+ }
+
+    G_input.printGraph();
+    
+    G_input.python_draw_graph();
     //graph_adj.python_draw_graph();
     
     
