@@ -15,7 +15,7 @@ typedef struct node{
     int vertex=-1;
     int sup=INT32_MAX;
     int k=-1;
-    //int lowerBound_k=-1;
+    int lowerBound_k=-1;
     //int upperBound_k=-1;
 
 }NODE;
@@ -37,21 +37,24 @@ class Graph{
             adj[u].push_back(*s); 
             s = new node; 
             s->vertex = u;
-            adj[v].push_back(*s); 
+            adj[v].push_back(*s);
+            return; 
         }
         void removeEdge(int u, int v){
             adj[u].remove_if([v](NODE& n) { return n.vertex == v; });
             adj[v].remove_if([u](NODE& n) { return n.vertex == u; });
+            return;
         }
 
         void printGraph(){
             for(int i=0;i< adj.size();i++){
                 cout<<i<<" ";
                 for(auto it = adj[i].begin(); it != adj[i].end(); it++)
-                    cout << it->vertex <<"("<<it->k<<")"<< " -> ";
+                    cout << it->vertex <<"("<<it->sup<<")"<< " -> ";
                 
                 cout<<"null"<<endl;
             }
+            return;
         }
         
         void python_draw_graph(){
@@ -59,7 +62,7 @@ class Graph{
             if (outfile.is_open()) {
                 for (int i=0;i< adj.size();i++) {
                     for(auto it = this->adj[i].begin(); it != this->adj[i].end(); it++)
-                        outfile << i <<" "<< it->vertex<< " "<<it->k<<"\n";
+                        outfile << i <<" "<< it->vertex<< " "<<it->lowerBound_k<<"\n";
                 }
                 outfile.close();
             } else {
@@ -70,6 +73,7 @@ class Graph{
             // 呼叫 Python 程式
             std::string cmd = "python show_graph.py output.txt";
             system(cmd.c_str());
+            return;
         }
         
         void compute_edge_support(int v, int w){
@@ -87,14 +91,20 @@ class Graph{
 
             // e(u,v) sup
             for(auto it = adj[v].begin(); it != adj[v].end(); it++)
-                if(it->vertex==w)
+                if(it->vertex==w){
                     it->sup=sup;
+                    break;
+                }
+                    
 
 
             // e(v,u) sup
             for(auto it = adj[w].begin(); it != adj[w].end(); it++)
-                if(it->vertex==v)
+                if(it->vertex==v){
                     it->sup=sup;
+                    break;
+                }
+                    
 
             return;
         }
@@ -109,6 +119,7 @@ class Graph{
                         }
                             
                 }
+                return;
         }
 
 
@@ -156,38 +167,19 @@ class Graph{
             return edge;
         }
 
-        void low_bound_compute(int u,int v){
-            int max_low=0;
-            vector<int> Q1, Q2;
 
-            Q1=tau_hop_neighbor(u,(tau>>1));
-            Q2=tau_hop_neighbor(v,(tau>>1));
-            
-            cout<<"\n u neighbors:";
-            for(int i=0; i<Q1.size(); i++)
-                cout<<Q1[i]<<" ";
-            cout<<"\n v neighbors:";
-            for(int i=0; i<Q2.size(); i++)
-                cout<<Q2[i]<<" ";
-
-            if((tau&1)==0){ //even
-                int omega_u=Q1.size()+1;
-                int omega_v=Q2.size()+1;
-                max_low=max(omega_u,omega_v);
-            }else{          //odd
-                set<int> S1;
-                for(int i=0;i<Q1.size();i++)
-                    S1.insert(Q1[i]);
-                for(int i=0;i<Q2.size();i++)
-                    S1.insert(Q2[i]);
-                max_low=max(max_low, int(S1.size()) );
+        void all_low_bound_compute(int *small_low_bound){
+            for (int i=0;i< adj.size();i++) {
+                for(auto it = adj[i].begin(); it != adj[i].end(); it++)
+                    if(i < it->vertex){
+                        low_bound_compute(i,it->vertex);
+                        if(it->lowerBound_k < *small_low_bound)
+                            *small_low_bound=it->lowerBound_k;
+                    }
+                            
             }
-            
-            cout<<"\n max_low: "<<max_low<<endl;
-
-
+            return;
         }
-
     private:
         vector<int> tau_hop_neighbor(int v,int tau1){
             queue<int> q;
@@ -226,6 +218,74 @@ class Graph{
             return false;
         }
 
+        void low_bound_compute(int u,int v){
+            int max_low=0;
+            vector<int> Q1, Q2;
+
+            Q1=tau_hop_neighbor(u,(tau>>1));
+            Q2=tau_hop_neighbor(v,(tau>>1));
+            
+            // cout<<"\n u neighbors:";
+            // for(int i=0; i<Q1.size(); i++)
+            //     cout<<Q1[i]<<" ";
+            // cout<<"\n v neighbors:";
+            // for(int i=0; i<Q2.size(); i++)
+            //     cout<<Q2[i]<<" ";
+            // cout<<endl;
+
+            if((tau&1)==0){ //even
+                int omega_u=Q1.size()+1;
+                int omega_v=Q2.size()+1;
+                max_low=max(omega_u,omega_v);
+            }else{          //odd
+                set<int> S1;
+                //cout<<" S1 set: ";
+                for(int i=0;i<Q1.size();i++)
+                    S1.insert(Q1[i]);
+                for(int i=0;i<Q2.size();i++)
+                    S1.insert(Q2[i]);
+                
+                // for(auto i=S1.begin(); i!=S1.end(); i++)
+                //     cout<<*i<<" ";
+
+                cout<<endl;
+                max_low=max(max_low, int(S1.size()) );
+            }
+            
+            
+
+            for(int i=0; i<Q1.size(); i++)
+                for(int j=0; j<Q2.size(); j++)
+                    if(Q1[i]==Q2[j]){
+                        vector<int> Q3;
+                        Q3=tau_hop_neighbor(Q1[i],(tau>>1));
+                        // cout<<Q1[i]<<"MNN's neighbor: ";
+                        // for(int c=0 ;c<int(Q3.size()); c++)
+                        //     cout<<Q3[c]<<" ";
+                        // cout<<endl;
+                        max_low=max(max_low, int(Q3.size()+1)); //Q3.size()+"1" : plus itself
+                    }
+                
+            // cout<<"\n max_low: "<<max_low<<endl;
+
+            // e(u,v) sup
+            for(auto it = adj[v].begin(); it != adj[v].end(); it++)
+                if(it->vertex==u){
+                    it->lowerBound_k=max_low;
+                    break;
+                }
+                    
+
+            // e(v,u) sup
+            for(auto it = adj[u].begin(); it != adj[u].end(); it++)
+                if(it->vertex==v){
+                    it->lowerBound_k=max_low;
+                    break;
+                }
+                    
+
+            return;
+        }
         
 
 };

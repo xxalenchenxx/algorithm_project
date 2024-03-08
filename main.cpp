@@ -46,12 +46,10 @@ bool read_file(string filename ,int *nodes,int *edges,Graph *G_in,int tau){
     return true;
 }
 
-
-
-bool edge_smaller_than_k(vector<list<node>> graph_adj,int k,int *u,int *v){
+bool edge_smaller_than_k(vector<list<node>> graph_adj,int sup,int *u,int *v){
     for (int i=0;i< graph_adj.size();i++) {
         for(auto it = graph_adj[i].begin(); it != graph_adj[i].end(); it++)
-            if(it->sup<=k){
+            if(it->sup<=sup){
                 *u=i;
                 *v=it->vertex;
                 return true;
@@ -63,28 +61,28 @@ bool edge_smaller_than_k(vector<list<node>> graph_adj,int k,int *u,int *v){
 void HOTdecom(Graph *G_input){
 //start HOtdecom
     //compute_ALL_support
-    int min_k=INT32_MAX;
-    G_input->compute_ALL_support(&min_k);
+    int min_sup=INT32_MAX;
+    G_input->compute_ALL_support(&min_sup);
     //G_input.printGraph();
     Graph graph_adj=*G_input;
 
 
  while(check_any_edge(graph_adj)){
-    cout<<"---------------k="<<min_k+2<<"-----------------"<<endl;   
+    cout<<"---------------k="<<min_sup+2<<"-----------------"<<endl;   
     int u,v;
-    while(edge_smaller_than_k(graph_adj.adj,min_k,&u,&v)){
+    while(edge_smaller_than_k(graph_adj.adj,min_sup,&u,&v)){
         vector<EDGE> effect_edge;
-        cout<<"1"<<endl;
+        //cout<<"1"<<endl;
         //put k_truss in edge(u,v)
         
 
         for(auto it = G_input->adj[u].begin(); it != G_input->adj[u].end(); it++)
             if(it->vertex==v)
-                it->k=min_k+2;
+                it->k=min_sup+2;
 
         for(auto it = G_input->adj[v].begin(); it != G_input->adj[v].end(); it++)
             if(it->vertex==u)
-                it->k=min_k+2;
+                it->k=min_sup+2;
         
         //G'<-G\e(u,v)
         //Graph graph_before=graph_adj;
@@ -97,7 +95,7 @@ void HOTdecom(Graph *G_input){
         
         for(int i=0; i<effect_edge.size(); i++)
             for(auto it = graph_adj.adj[effect_edge[i].s].begin(); it != graph_adj.adj[effect_edge[i].s].end(); it++)
-                if(it->vertex==effect_edge[i].t && it->sup>min_k)
+                if(it->vertex==effect_edge[i].t && it->sup>min_sup)
                     graph_adj.compute_edge_support(effect_edge[i].s,effect_edge[i].t);
         
 
@@ -108,7 +106,7 @@ void HOTdecom(Graph *G_input){
         // }
     }
     //graph_adj.python_draw_graph();
-    min_k++;
+    min_sup++;
  }
 }
 
@@ -119,7 +117,7 @@ int main(){
 
     //-------------------input element----------------------------------
     string filename="./dataset/test.txt";//graph
-    int tau=3;
+    int tau=2;
 
     //-------------------read file----------------------------------
     if(!read_file(filename,&node_num,&edge_num,&G_input,tau))
@@ -132,17 +130,67 @@ int main(){
 
     //HOTdecom(&G_input);
 
-    G_input.low_bound_compute(2,4);
+    //HOTdecom+ start
+    int min_k=INT32_MAX;
+    G_input.all_low_bound_compute(&min_k);
+    //G_input.printGraph();
+    Graph graph_adj=G_input;
+    cout<<"min_k: "<<min_k<<endl;
+    
+    //calculate support which low bound = min_k
+    for(int i=0;i<graph_adj.adj.size();i++){
+        for(auto it=graph_adj.adj[i].begin();it!=graph_adj.adj[i].end();it++) {
+            if(it->lowerBound_k==min_k && i<it->vertex)
+                graph_adj.compute_edge_support(i,it->vertex);
+        }
+    }
 
-    // G_input.printGraph();
-    
-    // G_input.python_draw_graph();
-    //graph_adj.python_draw_graph();
-    
-    
-    //start HOtdecom
-    // while(check_any_edge(G_input)){
+    int u,v;
+    while(edge_smaller_than_k(graph_adj.adj,(min_k-2),&u,&v)){
+        vector<EDGE> effect_edge;
+        //cout<<"1"<<endl;
 
+        //put k_truss in edge(u,v)
+        for(auto it = G_input.adj[u].begin(); it != G_input.adj[u].end(); it++)
+            if(it->vertex==v)
+                it->k=min_k;
+
+        for(auto it = G_input.adj[v].begin(); it != G_input.adj[v].end(); it++)
+            if(it->vertex==u)
+                it->k=min_k;
+        
+        effect_edge=graph_adj.effect_edge(u,v);
+        graph_adj.removeEdge(u,v);
+
+        cout<<"remove e("<<u<<", "<<v<<")"<<endl;
+        for(int i=0; i<effect_edge.size(); i++)
+            for(auto it = graph_adj.adj[effect_edge[i].s].begin(); it != graph_adj.adj[effect_edge[i].s].end(); it++){
+                if(it->vertex==effect_edge[i].t){
+                    //delay update
+                    if(it->lowerBound_k>min_k)
+                        continue;
+
+                    //early prunning
+
+
+                    //unchang support
+
+
+                    //default case
+                    if((it->sup+2) > min_k)
+                        graph_adj.compute_edge_support(effect_edge[i].s,effect_edge[i].t);
+                
+                
+                } 
+            }
+                // if(it->vertex==effect_edge[i].t && it->sup>min_k)
+                //     graph_adj.compute_edge_support(effect_edge[i].s,effect_edge[i].t);
+    }
+
+    graph_adj.printGraph();
+    //G_input.python_draw_graph();
+    // while(check_any_edge(graph_adj)){
+    
     // }
 
 
