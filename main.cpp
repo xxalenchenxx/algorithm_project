@@ -119,7 +119,7 @@ int main(){
 
     //-------------------input element----------------------------------
     string filename="./dataset/test.txt";//graph
-    int tau=2;
+    int tau=3;
 
     //-------------------read file----------------------------------
     if(!read_file(filename,&node_num,&edge_num,&G_input,tau))
@@ -130,11 +130,13 @@ int main(){
     // cout << "Edges: " << edge_num << endl;
 
 
-    HOTdecom(&G_input);
+    //HOTdecom(&G_input);
 
-    G_input.printGraph();
+    G_input.low_bound_compute(2,4);
+
+    // G_input.printGraph();
     
-    G_input.python_draw_graph();
+    // G_input.python_draw_graph();
     //graph_adj.python_draw_graph();
     
     

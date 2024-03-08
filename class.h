@@ -5,6 +5,7 @@
 #include <fstream>
 #include <sstream>
 #include <list>
+#include <set>
 #include <queue>
 #include <map>
 using namespace std;
@@ -12,7 +13,7 @@ using namespace std;
 //struct node
 typedef struct node{
     int vertex=-1;
-    int sup=-1;
+    int sup=INT32_MAX;
     int k=-1;
     //int lowerBound_k=-1;
     //int upperBound_k=-1;
@@ -74,8 +75,8 @@ class Graph{
         void compute_edge_support(int v, int w){
             vector<int> Q1, Q2;
             int sup=0;
-            Q1=tau_hop_neighbor(v);
-            Q2=tau_hop_neighbor(w);
+            Q1=tau_hop_neighbor(v,tau);
+            Q2=tau_hop_neighbor(w,tau);
             //find MNN nodes
             for(int i=0; i<Q1.size(); i++){
                 for(int j=0; j<Q2.size(); j++)
@@ -115,9 +116,8 @@ class Graph{
             vector<int> Q1, Q2;
             vector<EDGE> edge;
             
-            Q1=tau_hop_neighbor(u);
-            
-            Q2=tau_hop_neighbor(v);
+            Q1=tau_hop_neighbor(u,tau);
+            Q2=tau_hop_neighbor(v,tau);
             
             // cout<<"\n u neighbors:";
             // for(int i=0; i<Q1.size(); i++)
@@ -155,8 +155,41 @@ class Graph{
       
             return edge;
         }
+
+        void low_bound_compute(int u,int v){
+            int max_low=0;
+            vector<int> Q1, Q2;
+
+            Q1=tau_hop_neighbor(u,(tau>>1));
+            Q2=tau_hop_neighbor(v,(tau>>1));
+            
+            cout<<"\n u neighbors:";
+            for(int i=0; i<Q1.size(); i++)
+                cout<<Q1[i]<<" ";
+            cout<<"\n v neighbors:";
+            for(int i=0; i<Q2.size(); i++)
+                cout<<Q2[i]<<" ";
+
+            if((tau&1)==0){ //even
+                int omega_u=Q1.size()+1;
+                int omega_v=Q2.size()+1;
+                max_low=max(omega_u,omega_v);
+            }else{          //odd
+                set<int> S1;
+                for(int i=0;i<Q1.size();i++)
+                    S1.insert(Q1[i]);
+                for(int i=0;i<Q2.size();i++)
+                    S1.insert(Q2[i]);
+                max_low=max(max_low, int(S1.size()) );
+            }
+            
+            cout<<"\n max_low: "<<max_low<<endl;
+
+
+        }
+
     private:
-        vector<int> tau_hop_neighbor(int v){
+        vector<int> tau_hop_neighbor(int v,int tau1){
             queue<int> q;
             vector<bool> visited(adj.size(), false);
             map<int ,int> distances;
@@ -170,7 +203,7 @@ class Graph{
                 Q1.push_back(node);
                 q.pop();
                 
-                if(distances[node]<tau){
+                if(distances[node]<tau1){
                     for(auto it = adj[node].begin(); it != adj[node].end(); it++){
                         if(!visited[it->vertex]){
                             distances[it->vertex]=distances[node]+1;
@@ -194,9 +227,8 @@ class Graph{
         }
 
         
+
 };
-
-
 
 
 #endif
