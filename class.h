@@ -15,7 +15,7 @@ typedef struct node{
     int vertex=-1;
     int sup=INT32_MAX;
     int k=-1;
-    int lowerBound_k=-1;
+    int lowerBound_k=INT32_MAX;
     //int upperBound_k=-1;
 
 }NODE;
@@ -50,7 +50,7 @@ class Graph{
             for(int i=0;i< adj.size();i++){
                 cout<<i<<" ";
                 for(auto it = adj[i].begin(); it != adj[i].end(); it++)
-                    cout << it->vertex <<"("<<it->sup<<")"<< " -> ";
+                    cout << it->vertex <<"("<<it->lowerBound_k<<")"<< " -> ";
                 
                 cout<<"null"<<endl;
             }
@@ -62,7 +62,7 @@ class Graph{
             if (outfile.is_open()) {
                 for (int i=0;i< adj.size();i++) {
                     for(auto it = this->adj[i].begin(); it != this->adj[i].end(); it++)
-                        outfile << i <<" "<< it->vertex<< " "<<it->lowerBound_k<<"\n";
+                        outfile << i <<" "<< it->vertex<< " "<<it->k<<"\n";
                 }
                 outfile.close();
             } else {
@@ -70,7 +70,7 @@ class Graph{
                 return;
             }
 
-            // 呼叫 Python 程式
+            // call python plt
             std::string cmd = "python show_graph.py output.txt";
             system(cmd.c_str());
             return;
@@ -169,6 +169,7 @@ class Graph{
 
 
         void all_low_bound_compute(int *small_low_bound){
+            
             for (int i=0;i< adj.size();i++) {
                 for(auto it = adj[i].begin(); it != adj[i].end(); it++)
                     if(i < it->vertex){
@@ -180,6 +181,97 @@ class Graph{
             }
             return;
         }
+
+        bool prunVertex(Graph *G_input,int v, int min_k){
+            vector<int> V;
+            queue<int> Q2; //BFS
+            V=tau_hop_neighbor(v,tau);
+            int degree_v = V.size();
+            
+            // cout<<v<<" of "<<"degree: "<<degree_v<<endl;
+            if((degree_v+1)<=min_k){
+                Q2.push(v);
+                while(!Q2.empty()){
+                    
+                    int q=Q2.front();
+                    Q2.pop();
+                    
+                    V=tau_hop_neighbor(q,tau);
+                   
+                    //put truss in e(u,v) & e(v,u)
+                    //cout<<"1"<<endl;
+                    while(!adj[q].empty()){
+                        auto it_q=adj[q].begin();
+                        //cout<<"2"<<endl;
+                        for(auto it = G_input->adj[q].begin(); it!= G_input->adj[q].end();it++){
+                            if(it->vertex==it_q->vertex){
+                                it->k=min_k;
+                                break;
+                            }
+                        }
+                        
+                        for(auto it = G_input->adj[it_q->vertex].begin(); it!= G_input->adj[it_q->vertex].end();it++){
+                            if(it->vertex==q){
+                                it->k=min_k;
+                                break;
+                            }
+                        }
+                        //cout<<"3"<<endl;
+                        //cout<<"remove edge:( "<<q<<" , "<<it_q->vertex<<" )"<<endl;
+                        removeEdge(q,it_q->vertex);
+                        //cout<<"4"<<endl;
+                    }
+
+                    vector<int> remain;
+                    //cout<<"5"<<endl;
+                    for(int i=0; i<V.size(); i++){ //vertex q neighbor
+                        //cout<<"Vertex "<<V[i]<<" ";
+                        vector<int> C =tau_hop_neighbor(V[i],tau);
+                        if((C.size()+1)<=min_k)
+                            Q2.push(V[i]);
+                        else
+                            remain.push_back(V[i]);
+                    }
+                    
+                
+                    //test ?
+                    for(int i=0;i<remain.size();i++){
+                        for(int j=0;j<remain.size();j++){
+                            if(remain[i]<remain[j]){
+                                for(auto it=adj[remain[i]].begin();it!=adj[remain[i]].end();it++)
+                                    if(it->lowerBound_k<=min_k)
+                                        compute_edge_support(remain[i],it->vertex);
+                            }
+                        }
+                    }
+
+                }
+                
+                //cout<<endl;
+                return true;
+            }else
+                return false;
+            
+            
+        }
+    
+        bool unchange_support(int s,int t,int u,int v){
+            int s_to_u,s_to_v,t_to_u,t_to_v;
+            int s_to_u_add,s_to_v_add,t_to_u_add,t_to_v_add;
+            distance_node(s,u,v,&s_to_u,&s_to_v);
+            distance_node(t,u,v,&t_to_u,&t_to_v);
+            //add removed edge
+            addEdge(u,v);
+            // cout<<"--------------add edge:( "<<u<<","<<v<<" )------------------"<<endl;
+            distance_node(s,u,v,&s_to_u_add,&s_to_v_add);
+            distance_node(t,u,v,&t_to_u_add,&t_to_v_add);
+            removeEdge(u,v);
+            // cout<<"--------------remove edge:( "<<u<<","<<v<<" )------------------"<<endl;
+            if(s_to_u_add==s_to_u&&s_to_v_add==s_to_v&&t_to_u_add==t_to_u&&t_to_v_add==t_to_v)
+                return true;
+            return false;
+        }
+    
     private:
         vector<int> tau_hop_neighbor(int v,int tau1){
             queue<int> q;
@@ -287,6 +379,36 @@ class Graph{
             return;
         }
         
+        void distance_node(int s,int u, int v,int *dis_to_v,int *dis_to_u){
+            queue<int> q;
+            vector<bool> visited(adj.size(), false);
+            map<int ,int> distances;
+            vector<int> Q1;
+
+            q.push(v);
+            distances[v]=0;
+            visited[v]=true;
+            while(!q.empty()){
+                int node = q.front();
+                Q1.push_back(node);
+                q.pop();
+                
+                if(distances[node]<tau){
+                    for(auto it = adj[node].begin(); it != adj[node].end(); it++){
+                        if(!visited[it->vertex]){
+                            distances[it->vertex]=distances[node]+1;
+                            visited[it->vertex]=true;
+                            q.push(it->vertex);
+                        }
+                            
+                    }   
+                }
+            }
+        
+            *dis_to_u = (distances[u])?distances[u]:-1;
+            *dis_to_v = (distances[v])?distances[v]:-1;
+            return;
+        }
 
 };
 
