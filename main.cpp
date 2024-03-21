@@ -115,33 +115,11 @@ void HOTdecom(Graph *G_input){
  }
 }
 
-
-int main(){
-    Graph G_input;
-    int node_num =0, edge_num =0;
-
-    //-------------------input element----------------------------------
-    string filename="./dataset/CG_new_1.txt";//graph
-    int tau=2;
-
-    //-------------------read file----------------------------------
-    if(!read_file(filename,&node_num,&edge_num,&G_input,tau))
-        return EXIT_FAILURE;
-    
-
-
-    // cout << "Nodes: " << node_num << endl;
-    // cout << "Edges: " << edge_num << endl;
-
-
-    //HOTdecom(&G_input);
-
-    auto start = chrono::high_resolution_clock::now();
-    //HOTdecom+ start
-    int min_k=INT32_MAX;
-    G_input.all_low_bound_compute(&min_k);
+void HOTdecom_plus(Graph *G_input){
+       int min_k=INT32_MAX;
+    G_input->all_low_bound_compute(&min_k);
     //G_input.printGraph();
-    Graph graph_adj=G_input;
+    Graph graph_adj=*G_input;
     cout<<"min_k: "<<min_k<<endl;
     
     
@@ -170,13 +148,13 @@ while(check_any_edge(graph_adj)){
         //cout<<"1"<<endl;
 
         //put k_truss in edge(u,v)
-        for(auto it = G_input.adj[u].begin(); it != G_input.adj[u].end(); it++)
+        for(auto it = G_input->adj[u].begin(); it != G_input->adj[u].end(); it++)
             if(it->vertex==v){
                 it->k=min_k;
                 break;
             }
 
-        for(auto it = G_input.adj[v].begin(); it != G_input.adj[v].end(); it++)
+        for(auto it = G_input->adj[v].begin(); it != G_input->adj[v].end(); it++)
             if(it->vertex==u){
                 it->k=min_k;
                 break;
@@ -201,7 +179,7 @@ while(check_any_edge(graph_adj)){
 
                     cout<<"do prunVertex!!"<<endl;
                     //early prunning
-                    if(graph_adj.prunVertex(&G_input,effect_edge[i].s , min_k)|| graph_adj.prunVertex(&G_input,effect_edge[i].t , min_k) ){
+                    if(graph_adj.prunVertex(G_input,effect_edge[i].s , min_k)|| graph_adj.prunVertex(G_input,effect_edge[i].t , min_k) ){
                         cout<<"real prunVertex!!"<<endl;
                         break;
                     }
@@ -232,6 +210,36 @@ while(check_any_edge(graph_adj)){
     //graph_adj.python_draw_graph();
     min_k++;
 }
+return;
+
+}
+
+
+int main(){
+    Graph G_input;
+    int node_num =0, edge_num =0;
+
+    //-------------------input element----------------------------------
+    string filename="./dataset/test.txt";//graph
+    int tau=2;
+
+    //-------------------read file----------------------------------
+    if(!read_file(filename,&node_num,&edge_num,&G_input,tau))
+        return EXIT_FAILURE;
+    
+    auto start = chrono::high_resolution_clock::now();
+
+    // cout << "Nodes: " << node_num << endl;
+    // cout << "Edges: " << edge_num << endl;
+
+    //-------------------HOTdecom----------------------------------
+    //HOTdecom(&G_input);
+
+
+
+    //-------------------HOTdecom+----------------------------------
+    HOTdecom_plus(&G_input);
+    
 
 
     auto end = std::chrono::high_resolution_clock::now();
