@@ -50,9 +50,21 @@ int main(){
         int node1, node2;
         ss >> node1 >> node2;
 
+        if(node1==node2)
+            continue;
+        
         // Output mapped node numbers
-        outfile << node_map[node1] << "\t" << node_map[node2] << endl;
+        if(node_map[node1]>node_map[node2]){
+            outfile << node_map[node2] << "\t" << node_map[node1] << endl;
+        }else{
+            outfile << node_map[node1] << "\t" << node_map[node2] << endl;
+        }
+ 
+        
     }
+
+    
+
 
     myfile.close();
     outfile.close();

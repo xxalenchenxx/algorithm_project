@@ -220,15 +220,32 @@ int main(){
     int node_num =0, edge_num =0;
 
     //-------------------input element----------------------------------
-    string filename="./dataset/test.txt";//graph
+    string filename="./dataset/CA_new.txt";//graph
     int tau=2;
 
     //-------------------read file----------------------------------
     if(!read_file(filename,&node_num,&edge_num,&G_input,tau))
         return EXIT_FAILURE;
     
-    auto start = chrono::high_resolution_clock::now();
 
+
+    int min_low=INT32_MAX;
+    G_input.all_low_bound_compute(&min_low);
+
+    for(int i=0;i<G_input.adj.size();i++){
+        for(auto it=G_input.adj[i].begin();it!=G_input.adj[i].end();it++){
+            if(it->lowerBound_k==INT32_MAX){
+                cout<<"wrong"<<endl;
+                return 0;
+            }
+        }
+    }
+
+
+
+
+    
+    auto start = chrono::high_resolution_clock::now();
     // cout << "Nodes: " << node_num << endl;
     // cout << "Edges: " << edge_num << endl;
 
@@ -238,20 +255,21 @@ int main(){
 
 
     //-------------------HOTdecom+----------------------------------
-    HOTdecom_plus(&G_input);
+    //HOTdecom_plus(&G_input);
     
 
 
-    auto end = std::chrono::high_resolution_clock::now();
-    double duration = std::chrono::duration_cast<std::chrono::duration<double>>(end - start).count();
-    cout << "run time: " << duration << " s\n";
 
-    cout<<"algorithm end!!"<<endl;
+
+    //-------------------time recorder end----------------------------------
+    // auto end = std::chrono::high_resolution_clock::now();
+    // double duration = std::chrono::duration_cast<std::chrono::duration<double>>(end - start).count();
+    // cout << "run time: " << duration << " s\n";
+
+    //cout<<"algorithm end!!"<<endl;
+    
     //graph_adj.printGraph();
-    G_input.python_draw_graph();
-    // while(check_any_edge(graph_adj)){
-    
-    // }
+    //G_input.python_draw_graph();
 
 
     return 0;
