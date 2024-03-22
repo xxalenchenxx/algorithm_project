@@ -220,7 +220,7 @@ int main(){
     int node_num =0, edge_num =0;
 
     //-------------------input element----------------------------------
-    string filename="./dataset/CA_new.txt";//graph
+    string filename="./dataset/CH1.txt";//graph
     int tau=2;
 
     //-------------------read file----------------------------------
@@ -232,6 +232,7 @@ int main(){
     int min_low=INT32_MAX;
     G_input.all_low_bound_compute(&min_low);
 
+    G_input.printGraph();
     for(int i=0;i<G_input.adj.size();i++){
         for(auto it=G_input.adj[i].begin();it!=G_input.adj[i].end();it++){
             if(it->lowerBound_k==INT32_MAX){
@@ -241,7 +242,7 @@ int main(){
         }
     }
 
-
+    cout<<"success!!"<<endl;
 
 
     

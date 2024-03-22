@@ -1,5 +1,5 @@
-filename="./dataset/CG_new.txt"
-output_filename="./dataset/CG_new_1.txt"
+filename="./dataset/CA1.txt"
+output_filename="./dataset/CA1.txt"
 
 # 讀取檔案
 with open(filename, "r") as file:
