@@ -10,9 +10,9 @@ int main(){
     string in[5]={"t","LJ","dblp","orkut","twitter"};
     string out[5]={"t1","LJ1","dblp1","orkut1","twitter1"};
     
-    for(int i=0; i<5; i++){
+    for(int i=0; i<1; i++){
         ifstream myfile;
-        myfile.open("../datat/"+in[i]+".txt");
+        myfile.open("./datat/"+in[i]+".txt");
         string str;
         
         if(!myfile.is_open()){
@@ -22,7 +22,7 @@ int main(){
             
         
         // Read and write the first two lines
-        ofstream outfile("../datat/"+out[i]+".txt");
+        ofstream outfile("./datat/"+out[i]+".txt");
 
         // Construct the node map
         while(getline(myfile, str)){
