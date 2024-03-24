@@ -220,29 +220,33 @@ int main(){
     int node_num =0, edge_num =0;
 
     //-------------------input element----------------------------------
-    string filename="./dataset/CH1.txt";//graph
+    string filename="./dataset/test.txt";//graph
     int tau=2;
 
     //-------------------read file----------------------------------
     if(!read_file(filename,&node_num,&edge_num,&G_input,tau))
         return EXIT_FAILURE;
     
-
+    
 
     int min_low=INT32_MAX;
-    G_input.all_low_bound_compute(&min_low);
-
+    int max_upper=-1;
+    //G_input.all_low_bound_compute(&min_low);
+    G_input.compute_ALL_support(&min_low);
+    G_input.all_upper_bound_compute(&max_upper);
     G_input.printGraph();
-    for(int i=0;i<G_input.adj.size();i++){
-        for(auto it=G_input.adj[i].begin();it!=G_input.adj[i].end();it++){
-            if(it->lowerBound_k==INT32_MAX){
-                cout<<"wrong"<<endl;
-                return 0;
-            }
-        }
-    }
+    //-------------------test degree is o?----------------------------------
+    // G_input.printGraph();
+    // for(int i=0;i<G_input.adj.size();i++){
+    //     for(auto it=G_input.adj[i].begin();it!=G_input.adj[i].end();it++){
+    //         if(it->lowerBound_k==INT32_MAX){
+    //             cout<<"wrong"<<endl;
+    //             return 0;
+    //         }
+    //     }
+    // }
 
-    cout<<"success!!"<<endl;
+    // cout<<"success!!"<<endl;
 
 
     

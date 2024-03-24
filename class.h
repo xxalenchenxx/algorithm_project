@@ -16,7 +16,7 @@ typedef struct node{
     int sup=INT32_MAX;
     int k=-1;
     int lowerBound_k=INT32_MAX;
-    //int upperBound_k=-1;
+    int upperBound_k=INT32_MAX;
 
 }NODE;
 
@@ -50,7 +50,7 @@ class Graph{
             for(int i=0;i< adj.size();i++){
                 cout<<i<<" ";
                 for(auto it = adj[i].begin(); it != adj[i].end(); it++)
-                    cout << it->vertex <<"("<<it->lowerBound_k<<")"<< " -> ";
+                    cout << it->vertex <<"("<<it->upperBound_k<<")"<< " -> ";
                 
                 cout<<"null"<<endl;
             }
@@ -272,6 +272,77 @@ class Graph{
             return false;
         }
     
+        void upper_bound_compute(int u,int v){
+            int l=0;
+            int r=0;
+            int mid=0;
+            int temp_upper_bound=l;
+            set<int> mnn;
+            vector<int> Q1, Q2;
+            for(auto it=this->adj[u].begin();it!=this->adj[u].end();it++){
+                if(it->vertex==v){
+                    r=it->sup;
+                    break;
+                }
+            }
+            Q1=tau_hop_neighbor(u,tau); //u
+            Q2=tau_hop_neighbor(v,tau); //v
+
+            for(int i=0; i<Q1.size(); i++)
+                for(int j=0; j<Q2.size(); j++)
+                    if(Q1[i]==Q2[j])
+                        mnn.insert(Q1[i]);
+            
+                  
+            while(l<=r){
+                int number_V=mnn.size();  // |V(G'')| no u & v
+                mid=(l+r)>>1;
+
+                if(Q1.size()<Q2.size()){
+                    for(auto it=adj[u].begin();it!=adj[u].end();it++)
+                        if(mnn.find(it->vertex)!=mnn.end()&& it->sup<mid)
+                            number_V--;
+                }
+                else{
+                    for(auto it=adj[v].begin();it!=adj[v].end();it++)
+                        if(mnn.find(it->vertex)!=mnn.end()&& it->sup<mid)
+                            number_V--;
+                }
+            
+                if(number_V<mid)
+                    r=mid-1;
+                else
+                    temp_upper_bound=mid;l=mid+1;
+            
+            }
+
+            for(auto it = adj[u].begin(); it != adj[u].end(); it++)
+                if(it->vertex==v){
+                    it->upperBound_k=temp_upper_bound+2;
+                    break;
+            }
+
+            for(auto it = adj[v].begin(); it != adj[v].end(); it++)
+                if(it->vertex==u){
+                    it->upperBound_k=temp_upper_bound+2;
+                    break;
+            }
+
+            return;
+        }
+
+        void all_upper_bound_compute(int *max_upper_bound){
+            for (int i=0;i< adj.size();i++) {
+                for(auto it = adj[i].begin(); it != adj[i].end(); it++)
+                    if(i < it->vertex){
+                        upper_bound_compute(i,it->vertex);
+                        if(it->upperBound_k > *max_upper_bound)
+                            *max_upper_bound=it->upperBound_k;
+                    }
+                            
+            }
+            return;
+        }
     private:
         vector<int> tau_hop_neighbor(int v,int tau1){
             queue<int> q;
