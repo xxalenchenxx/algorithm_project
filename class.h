@@ -31,12 +31,16 @@ class Graph{
         int tau=0;
         Graph(){};
 
-        void addEdge(int u, int v){
+        void addEdge(int u, int v,int lowerBound_k,int upperBound_k){
             node* s = new node; 
             s->vertex = v;
+            s->lowerBound_k = lowerBound_k;
+            s->upperBound_k = upperBound_k;
             adj[u].push_back(*s); 
             s = new node; 
             s->vertex = u;
+            s->lowerBound_k = lowerBound_k;
+            s->upperBound_k = upperBound_k;
             adj[v].push_back(*s);
             return; 
         }
@@ -52,7 +56,7 @@ class Graph{
                 for(auto it = adj[i].begin(); it != adj[i].end(); it++)
                     cout << it->vertex <<"("<<it->upperBound_k<<")"<< " -> ";
                 
-                cout<<"null"<<endl;
+                cout<<"null\tlist size: "<<adj[i].size()<<endl;
             }
             return;
         }
@@ -261,7 +265,7 @@ class Graph{
             distance_node(s,u,v,&s_to_u,&s_to_v);
             distance_node(t,u,v,&t_to_u,&t_to_v);
             //add removed edge
-            addEdge(u,v);
+            addEdge(u,v,0,0);
             // cout<<"--------------add edge:( "<<u<<","<<v<<" )------------------"<<endl;
             distance_node(s,u,v,&s_to_u_add,&s_to_v_add);
             distance_node(t,u,v,&t_to_u_add,&t_to_v_add);
@@ -287,13 +291,13 @@ class Graph{
             }
             Q1=tau_hop_neighbor(u,tau); //u
             Q2=tau_hop_neighbor(v,tau); //v
-
+            //find MNN
             for(int i=0; i<Q1.size(); i++)
                 for(int j=0; j<Q2.size(); j++)
                     if(Q1[i]==Q2[j])
                         mnn.insert(Q1[i]);
             
-                  
+            //binary search more tied upper bound      
             while(l<=r){
                 int number_V=mnn.size();  // |V(G'')| no u & v
                 mid=(l+r)>>1;
@@ -315,7 +319,7 @@ class Graph{
                     temp_upper_bound=mid;l=mid+1;
             
             }
-
+            //insert upper bound in e(u,v) 
             for(auto it = adj[u].begin(); it != adj[u].end(); it++)
                 if(it->vertex==v){
                     it->upperBound_k=temp_upper_bound+2;

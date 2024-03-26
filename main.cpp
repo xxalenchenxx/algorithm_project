@@ -7,10 +7,9 @@ bool check_any_edge(Graph G){
             return true; 
     return false;
 }
-
+//-------------------read file function----------------------------------
 bool read_file(string filename ,int *nodes,int *edges,Graph *G_in,int tau){
     ifstream myfile;string str;
-    Graph G;
     int source = 0;
     int target = 0;
     //open file
@@ -27,7 +26,7 @@ bool read_file(string filename ,int *nodes,int *edges,Graph *G_in,int tau){
         ss >> token;
         if(token == "Nodes"){ //Nodes
             ss >> (*nodes);
-            G.adj.resize(*nodes);
+            G_in->adj.resize(*nodes);
             //cout << "Nodes: " << *nodes << endl;
         }
         else if(token == "Edges"){ //Edges
@@ -38,15 +37,15 @@ bool read_file(string filename ,int *nodes,int *edges,Graph *G_in,int tau){
             source= stoi(token);
             ss >> target;
             //cout << "Source: " << source << " , Target: " << target << endl;
-            G.addEdge(source,target);
+            G_in->addEdge(source,target,INT32_MAX,INT32_MAX);
         }    
     }
-    G.tau=tau;
-    *G_in=G;
+    G_in->tau=tau;
     
     return true;
 }
 
+//------------------- HOTdecom & HOTdecom+ function----------------------------------
 bool edge_smaller_than_k(vector<list<node>> graph_adj,int sup,int *u,int *v){
     for (int i=0;i< graph_adj.size();i++) {
         for(auto it = graph_adj[i].begin(); it != graph_adj[i].end(); it++)
@@ -214,6 +213,16 @@ return;
 
 }
 
+//-------------------Top_r function----------------------------------
+bool check_any_edge_is_kmax(Graph G,int k_max){
+    for(int i=0; i<G.adj.size(); i++)
+        for(auto it=G.adj[i].begin(); it!=G.adj[i].end(); it++)
+            if(it->k==k_max)
+                return true; 
+    return false;
+}
+
+
 
 int main(){
     Graph G_input;
@@ -222,19 +231,16 @@ int main(){
     //-------------------input element----------------------------------
     string filename="./dataset/test.txt";//graph
     int tau=2;
-
+    //-------------------Top_r input element----------------------------------
+    int top_r=2;
     //-------------------read file----------------------------------
     if(!read_file(filename,&node_num,&edge_num,&G_input,tau))
         return EXIT_FAILURE;
     
     
 
-    int min_low=INT32_MAX;
-    int max_upper=-1;
-    //G_input.all_low_bound_compute(&min_low);
-    G_input.compute_ALL_support(&min_low);
-    G_input.all_upper_bound_compute(&max_upper);
-    G_input.printGraph();
+    
+    
     //-------------------test degree is o?----------------------------------
     // G_input.printGraph();
     // for(int i=0;i<G_input.adj.size();i++){
@@ -263,8 +269,54 @@ int main(){
     //HOTdecom_plus(&G_input);
     
 
+    //-------------------Top_r algorithm----------------------------------
+    int min_sup=INT32_MAX;
+    int min_low=INT32_MAX;
+    int max_upper_k=-1;
+    //G_input.all_low_bound_compute(&min_low);
+    G_input.compute_ALL_support(&min_sup);
+    G_input.all_low_bound_compute(&min_low);
+    G_input.all_upper_bound_compute(&max_upper_k);
+    cout<<"----------------------------------input graph----------------------------------\n";
+    G_input.printGraph();
 
+    //-------------------Top_g element----------------------------------
+    Graph graph_adj;//top G
+    graph_adj.adj.resize(node_num);//give node_num
+    bool first=true;
+    int k_max=max_upper_k;
+    cout<<"max_upper: "<<max_upper_k<<endl;
+    
+    //while(check_any_edge_is_kmax(graph_adj,k_max)){
+    for(unsigned int i=0;i<1;i++){
+        
+        if(!first){
+            if(1){//find k_max(not INT_32MAX) in graph_adj
+                //code here
+            }else{
+                k_max-=top_r;
+            }
+        }
+        int k=k_max-top_r+1;
+        first=false;
 
+        //add edges of upperbound >kmax-r into top_G
+        //delete those edges from G_input
+        for(int i=0; i<G_input.adj.size(); i++){
+            for(auto it=G_input.adj[i].begin(); it!=G_input.adj[i].end();){
+                auto current=it++;
+                if(current->upperBound_k+top_r>k_max){
+                    graph_adj.addEdge(i,current->vertex,current->lowerBound_k,current->upperBound_k);
+                    G_input.removeEdge(i,current->vertex);
+                }
+            }
+        }
+
+        cout<<"\n----------------------------------graph_adj----------------------------------\n";
+        graph_adj.printGraph();
+        cout<<"\n----------------------------------G_input----------------------------------\n";
+        G_input.printGraph();
+    }
 
     //-------------------time recorder end----------------------------------
     // auto end = std::chrono::high_resolution_clock::now();
