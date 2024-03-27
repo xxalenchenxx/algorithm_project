@@ -270,22 +270,25 @@ int main(){
     
 
     //-------------------Top_r algorithm----------------------------------
-    int min_sup=INT32_MAX;
+    int min_sup_input=INT32_MAX;
+    int min_sup_top=INT32_MAX;
     int min_low=INT32_MAX;
     int max_upper_k=-1;
     //G_input.all_low_bound_compute(&min_low);
-    G_input.compute_ALL_support(&min_sup);
+    G_input.compute_ALL_support(&min_sup_input);
     G_input.all_low_bound_compute(&min_low);
     G_input.all_upper_bound_compute(&max_upper_k);
     cout<<"----------------------------------input graph----------------------------------\n";
     G_input.printGraph();
 
-    //-------------------Top_g element----------------------------------
+    //-------------------Top_g element & initial----------------------------------
     Graph graph_adj;//top G
-    graph_adj.adj.resize(node_num);//give node_num
+    graph_adj.adj.resize(node_num);//give node_nums
+    graph_adj.tau=tau;
+    
     bool first=true;
     int k_max=max_upper_k;
-    cout<<"max_upper: "<<max_upper_k<<endl;
+    //cout<<"max_upper: "<<max_upper_k<<endl;
     
     //while(check_any_edge_is_kmax(graph_adj,k_max)){
     for(unsigned int i=0;i<1;i++){
@@ -304,7 +307,8 @@ int main(){
         //delete those edges from G_input
         for(int i=0; i<G_input.adj.size(); i++){
             for(auto it=G_input.adj[i].begin(); it!=G_input.adj[i].end();){
-                auto current=it++;
+                auto current=it;
+                it++;
                 if(current->upperBound_k+top_r>k_max){
                     graph_adj.addEdge(i,current->vertex,current->lowerBound_k,current->upperBound_k);
                     G_input.removeEdge(i,current->vertex);
@@ -312,10 +316,18 @@ int main(){
             }
         }
 
-        cout<<"\n----------------------------------graph_adj----------------------------------\n";
+        cout<<"\n----------------------------------Top_G----------------------------------\n";
         graph_adj.printGraph();
-        cout<<"\n----------------------------------G_input----------------------------------\n";
-        G_input.printGraph();
+        graph_adj.compute_ALL_support(&min_sup_top);
+        cout<<"\n----------------------------------Top_G recompute sup----------------------------------\n";
+        graph_adj.printGraph();
+
+        // cout<<"\n----------------------------------G_input----------------------------------\n";
+        // G_input.printGraph();
+        // G_input.compute_ALL_support(&min_sup_input);
+        // cout<<"\n----------------------------------G_input recompute sup----------------------------------\n";
+        // G_input.printGraph();
+
     }
 
     //-------------------time recorder end----------------------------------

@@ -54,7 +54,7 @@ class Graph{
             for(int i=0;i< adj.size();i++){
                 cout<<i<<" ";
                 for(auto it = adj[i].begin(); it != adj[i].end(); it++)
-                    cout << it->vertex <<"("<<it->upperBound_k<<")"<< " -> ";
+                    cout << it->vertex <<"("<<it->sup<<")"<< " -> ";
                 
                 cout<<"null\tlist size: "<<adj[i].size()<<endl;
             }
@@ -85,45 +85,47 @@ class Graph{
             int sup=0;
             Q1=tau_hop_neighbor(v,tau);
             Q2=tau_hop_neighbor(w,tau);
+            
             //find MNN nodes
             for(int i=0; i<Q1.size(); i++){
                 for(int j=0; j<Q2.size(); j++)
-                    if(Q1[i]==Q2[j])
-                        sup++;     
+                    if(Q1[i]==Q2[j]){
+                        sup++; 
+                    }
+                            
             }
             
 
             // e(u,v) sup
-            for(auto it = adj[v].begin(); it != adj[v].end(); it++)
+            for(auto it = adj[v].begin(); it != adj[v].end(); it++){
                 if(it->vertex==w){
                     it->sup=sup;
                     break;
                 }
-                    
-
+            }
 
             // e(v,u) sup
-            for(auto it = adj[w].begin(); it != adj[w].end(); it++)
+            for(auto it = adj[w].begin(); it != adj[w].end(); it++){
                 if(it->vertex==v){
                     it->sup=sup;
                     break;
                 }
-                    
+            }
 
             return;
         }
 
         void compute_ALL_support(int *small_sup){
             for (int i=0;i< adj.size();i++) {
-                    for(auto it = adj[i].begin(); it != adj[i].end(); it++)
+                    for(auto it = adj[i].begin(); it != adj[i].end(); it++){
                         if(i< it->vertex){
                             compute_edge_support(i,it->vertex);
                             if(it->sup<*small_sup)
                                 *small_sup=it->sup;
                         }
-                            
-                }
-                return;
+                    }
+            }
+            return;
         }
 
 
@@ -165,8 +167,10 @@ class Graph{
             for(auto it=edge.begin(); it!=edge.end();)
                 if((it->s==u&&it->t==v)||(it->s==v&&it->t==u))
                     it=edge.erase(it);
-                else
+                else{
                     it++;
+                }
+                    
       
             return edge;
         }
@@ -231,10 +235,13 @@ class Graph{
                     for(int i=0; i<V.size(); i++){ //vertex q neighbor
                         //cout<<"Vertex "<<V[i]<<" ";
                         vector<int> C =tau_hop_neighbor(V[i],tau);
-                        if((C.size()+1)<=min_k)
+                        if((C.size()+1)<=min_k){
                             Q2.push(V[i]);
-                        else
+                        }  
+                        else{
                             remain.push_back(V[i]);
+                        }
+                            
                     }
                     
                 
@@ -253,8 +260,10 @@ class Graph{
                 
                 //cout<<endl;
                 return true;
-            }else
+            }else{
                 return false;
+            }
+                
             
             
         }
@@ -299,26 +308,41 @@ class Graph{
             
             //binary search more tied upper bound      
             while(l<=r){
-                int number_V=mnn.size();  // |V(G'')| no u & v
-                mid=(l+r)>>1;
+                int number_V=0;  // |V(G'')| no u & v
+                mid=(l+r)>>1; //sup based
 
-                if(Q1.size()<Q2.size()){
-                    for(auto it=adj[u].begin();it!=adj[u].end();it++)
-                        if(mnn.find(it->vertex)!=mnn.end()&& it->sup<mid)
-                            number_V--;
+                //BFS find node with sup>=mid
+                queue<int> Q; 
+                vector<bool> visited(adj.size(), false);
+                vector<int> distance(adj.size(), 0);
+                Q.empty();
+                Q.push(u);
+                visited[u] = true;
+                distance[u]=0;
+                while(!Q.empty()){
+                    number_V++;
+                    int q=Q.front();
+                    Q.pop();
+                    if(distance[q]<tau){
+                        for(auto it=adj[q].begin();it!=adj[q].end();it++){
+                            if( !visited[it->vertex] && it->sup>=mid){
+                                Q.push(it->vertex);
+                                distance[it->vertex]=distance[q]+1;
+                                visited[it->vertex]=true;
+                            }
+                        }
+                    }  
                 }
-                else{
-                    for(auto it=adj[v].begin();it!=adj[v].end();it++)
-                        if(mnn.find(it->vertex)!=mnn.end()&& it->sup<mid)
-                            number_V--;
-                }
-            
-                if(number_V<mid)
+                   
+                if((number_V-2)<mid){
                     r=mid-1;
-                else
+                }else{
                     temp_upper_bound=mid;l=mid+1;
+                }    
             
             }
+            
+
             //insert upper bound in e(u,v) 
             for(auto it = adj[u].begin(); it != adj[u].end(); it++)
                 if(it->vertex==v){
@@ -351,9 +375,8 @@ class Graph{
         vector<int> tau_hop_neighbor(int v,int tau1){
             queue<int> q;
             vector<bool> visited(adj.size(), false);
-            map<int ,int> distances;
+            vector<int> distances(adj.size(), 0);
             vector<int> Q1;
-
             q.push(v);
             distances[v]=0;
             visited[v]=true;
@@ -361,7 +384,6 @@ class Graph{
                 int node = q.front();
                 Q1.push_back(node);
                 q.pop();
-                
                 if(distances[node]<tau1){
                     for(auto it = adj[node].begin(); it != adj[node].end(); it++){
                         if(!visited[it->vertex]){
