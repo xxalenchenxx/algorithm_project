@@ -119,7 +119,7 @@ class Graph{
             for (int i=0;i< adj.size();i++) {
                     for(auto it = adj[i].begin(); it != adj[i].end(); it++){
                         if(i< it->vertex){
-                            *sup_count++;
+                            (*sup_count)++;
                             compute_edge_support(i,it->vertex);
                             if(it->sup<*small_sup)
                                 *small_sup=it->sup;

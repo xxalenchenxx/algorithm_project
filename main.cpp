@@ -98,13 +98,16 @@ void HOTdecom(Graph *G_input){
         //effect edge(u,v) after delete u,v
         //effect_edge=graph_before.effect_edge(u,v);
         
-        for(int i=0; i<effect_edge.size(); i++)
-            for(auto it = graph_adj.adj[effect_edge[i].s].begin(); it != graph_adj.adj[effect_edge[i].s].end(); it++)
-                if(it->vertex==effect_edge[i].t && it->sup>min_sup)
+        for(int i=0; i<effect_edge.size(); i++){
+            for(auto it = graph_adj.adj[effect_edge[i].s].begin(); it != graph_adj.adj[effect_edge[i].s].end(); it++){
+                if(it->vertex==effect_edge[i].t && it->sup>min_sup){
                     graph_adj.compute_edge_support(effect_edge[i].s,effect_edge[i].t);
-        
-
-        
+                    sup_count++;
+                }
+            }
+        }
+            
+ 
         // cout<<"\n effect_edge size: "<<effect_edge.size()<<endl;
         // for(int i=0;i<effect_edge.size();i++){
         //     cout<<effect_edge[i].s<<" "<<effect_edge[i].t<<endl;
@@ -113,14 +116,17 @@ void HOTdecom(Graph *G_input){
     //graph_adj.python_draw_graph();
     min_sup++;
  }
+    cout << "sup_count: "<<sup_count<<" times"<<endl;
+    return;
 }
 
 void HOTdecom_plus(Graph *G_input){
-       int min_k=INT32_MAX;
+    int min_k=INT32_MAX;
+    long sup_count=0;
     G_input->all_low_bound_compute(&min_k);
     //G_input.printGraph();
     Graph graph_adj=*G_input;
-    cout<<"min_k: "<<min_k<<endl;
+    // cout<<"min_k: "<<min_k<<endl;
     
     
     
@@ -134,8 +140,11 @@ while(check_any_edge(graph_adj)){
     //calculate support which low bound = min_k
     for(int i=0;i<graph_adj.adj.size();i++){
         for(auto it=graph_adj.adj[i].begin();it!=graph_adj.adj[i].end();it++) {
-            if(it->lowerBound_k==min_k && i<it->vertex)
+            if(it->lowerBound_k==min_k && i<it->vertex){
                 graph_adj.compute_edge_support(i,it->vertex);
+                sup_count++;
+            }
+                
         }
     }
 
@@ -172,22 +181,22 @@ while(check_any_edge(graph_adj)){
                     
                     // cout<<"do delay update"<<endl;
                     if(it->lowerBound_k>min_k){
-                        cout<<"real delay update"<<endl;
+                        //cout<<"real delay update"<<endl;
                         break;
                     }
                     // cout<<"no delay update"<<endl;
 
-                    cout<<"do prunVertex!!"<<endl;
+                    //cout<<"do prunVertex!!"<<endl;
                     //early prunning
                     if(graph_adj.prunVertex(G_input,effect_edge[i].s , min_k)|| graph_adj.prunVertex(G_input,effect_edge[i].t , min_k) ){
-                        cout<<"real prunVertex!!"<<endl;
+                        //cout<<"real prunVertex!!"<<endl;
                         break;
                     }
-                    cout<<"no prunVertex!!"<<endl;
+                    //cout<<"no prunVertex!!"<<endl;
 
                     //unchange support
                     if(graph_adj.unchange_support(effect_edge[i].s,effect_edge[i].t,u,v)){
-                        cout<<"unchange support!!"<<endl;
+                        //cout<<"unchange support!!"<<endl;
                         break;
                     }
                         
@@ -197,6 +206,7 @@ while(check_any_edge(graph_adj)){
                     //default case
                     if((it->sup+2) > min_k){
                         // cout<<"real default!!"<<endl;
+                        sup_count++;
                         graph_adj.compute_edge_support(effect_edge[i].s,effect_edge[i].t);
                     }
                     // cout<<"no default!!"<<endl;   
@@ -210,6 +220,7 @@ while(check_any_edge(graph_adj)){
     //graph_adj.python_draw_graph();
     min_k++;
 }
+ cout << "sup_count: "<<sup_count<<" times"<<endl;
 return;
 
 }
@@ -239,58 +250,197 @@ void k_max_in_graph(Graph G_input,int *max,int r){
     return;
 }
 
-int main(){
-    Graph G_input;
-    int node_num =0, edge_num =0;
+void HOTdecom_plus_D(Graph *G_input){
+    int min_k=INT32_MAX;
     long sup_count=0;
-    //-------------------input element----------------------------------
-    string filename="./dataset/CH1.txt";//graph
-    int tau=2;
-    //-------------------Top_r input element----------------------------------
-    int top_r=5;
-    //-------------------read file----------------------------------
-    if(!read_file(filename,&node_num,&edge_num,&G_input,tau))
-        return EXIT_FAILURE;
+    G_input->all_low_bound_compute(&min_k);
+    //G_input.printGraph();
+    Graph graph_adj=*G_input;
+    // cout<<"min_k: "<<min_k<<endl;
+    
     
     
 
+
+//for(int b=0;b<3;b++){
+
+while(check_any_edge(graph_adj)){
+    cout<<"-----------min_k: "<<min_k<<"-----------------"<<endl;
+    
+    //calculate support which low bound = min_k
+    for(int i=0;i<graph_adj.adj.size();i++){
+        for(auto it=graph_adj.adj[i].begin();it!=graph_adj.adj[i].end();it++) {
+            if(it->lowerBound_k==min_k && i<it->vertex){
+                graph_adj.compute_edge_support(i,it->vertex);
+                sup_count++;
+            }
+                
+        }
+    }
+
+
+
+    int u,v;
+    
+    while(edge_smaller_than_k(graph_adj.adj,(min_k-2),&u,&v)){
+        vector<EDGE> effect_edge;
+        //cout<<"1"<<endl;
+
+        //put k_truss in edge(u,v)
+        for(auto it = G_input->adj[u].begin(); it != G_input->adj[u].end(); it++)
+            if(it->vertex==v){
+                it->k=min_k;
+                break;
+            }
+
+        for(auto it = G_input->adj[v].begin(); it != G_input->adj[v].end(); it++)
+            if(it->vertex==u){
+                it->k=min_k;
+                break;
+            }
+
+
+        effect_edge=graph_adj.effect_edge(u,v);
+        graph_adj.removeEdge(u,v);
+
+        //cout<<"remove e("<<u<<", "<<v<<")"<<endl;
+        for(int i=0; i<effect_edge.size(); i++)
+            for(auto it = graph_adj.adj[effect_edge[i].s].begin(); it != graph_adj.adj[effect_edge[i].s].end(); it++){
+                if(it->vertex==effect_edge[i].t){
+                    //delay update
+                    
+                    // cout<<"do delay update"<<endl;
+                    if(it->lowerBound_k>min_k){
+                        //cout<<"real delay update"<<endl;
+                        break;
+                    }
+                    // cout<<"no delay update"<<endl;
+
+
+                    //default case
+                    if((it->sup+2) > min_k){
+                        // cout<<"real default!!"<<endl;
+                        sup_count++;
+                        graph_adj.compute_edge_support(effect_edge[i].s,effect_edge[i].t);
+                    }
+                    // cout<<"no default!!"<<endl;   
+                
+                
+                } 
+            }
+                // if(it->vertex==effect_edge[i].t && it->sup>min_k)
+                //     graph_adj.compute_edge_support(effect_edge[i].s,effect_edge[i].t);
+    }
+    //graph_adj.python_draw_graph();
+    min_k++;
+}
+ cout << "sup_count: "<<sup_count<<" times"<<endl;
+return;
+
+}
+
+
+void HOTdecom_plus_DU(Graph *G_input){
+    int min_k=INT32_MAX;
+    long sup_count=0;
+    G_input->all_low_bound_compute(&min_k);
+    //G_input.printGraph();
+    Graph graph_adj=*G_input;
+    // cout<<"min_k: "<<min_k<<endl;
     
     
-    //-------------------test degree is o?----------------------------------
-    // G_input.printGraph();
-    // for(int i=0;i<G_input.adj.size();i++){
-    //     for(auto it=G_input.adj[i].begin();it!=G_input.adj[i].end();it++){
-    //         if(it->lowerBound_k==INT32_MAX){
-    //             cout<<"wrong"<<endl;
-    //             return 0;
-    //         }
-    //     }
-    // }
-
-    // cout<<"success!!"<<endl;
-
-
-    
-    auto start = chrono::high_resolution_clock::now();
-    cout<<"start!! "<<endl;
-
-    // cout << "Nodes: " << node_num << endl;
-    // cout << "Edges: " << edge_num << endl;
-
-    //-------------------HOTdecom----------------------------------
-    //HOTdecom(&G_input);
-
-
-
-    //-------------------HOTdecom+----------------------------------
-    //HOTdecom_plus(&G_input);
     
 
-    //-------------------Top_r algorithm----------------------------------
-    int min_sup_input=INT32_MAX;
+
+//for(int b=0;b<3;b++){
+
+while(check_any_edge(graph_adj)){
+    cout<<"-----------min_k: "<<min_k<<"-----------------"<<endl;
+    
+    //calculate support which low bound = min_k
+    for(int i=0;i<graph_adj.adj.size();i++){
+        for(auto it=graph_adj.adj[i].begin();it!=graph_adj.adj[i].end();it++) {
+            if(it->lowerBound_k==min_k && i<it->vertex){
+                graph_adj.compute_edge_support(i,it->vertex);
+                sup_count++;
+            }
+                
+        }
+    }
+
+
+
+    int u,v;
+    
+    while(edge_smaller_than_k(graph_adj.adj,(min_k-2),&u,&v)){
+        vector<EDGE> effect_edge;
+        //cout<<"1"<<endl;
+
+        //put k_truss in edge(u,v)
+        for(auto it = G_input->adj[u].begin(); it != G_input->adj[u].end(); it++)
+            if(it->vertex==v){
+                it->k=min_k;
+                break;
+            }
+
+        for(auto it = G_input->adj[v].begin(); it != G_input->adj[v].end(); it++)
+            if(it->vertex==u){
+                it->k=min_k;
+                break;
+            }
+
+
+        effect_edge=graph_adj.effect_edge(u,v);
+        graph_adj.removeEdge(u,v);
+
+        //cout<<"remove e("<<u<<", "<<v<<")"<<endl;
+        for(int i=0; i<effect_edge.size(); i++)
+            for(auto it = graph_adj.adj[effect_edge[i].s].begin(); it != graph_adj.adj[effect_edge[i].s].end(); it++){
+                if(it->vertex==effect_edge[i].t){
+                    //delay update
+                    
+                    // cout<<"do delay update"<<endl;
+                    if(it->lowerBound_k>min_k){
+                        //cout<<"real delay update"<<endl;
+                        break;
+                    }
+
+                    //unchange support
+                    if(graph_adj.unchange_support(effect_edge[i].s,effect_edge[i].t,u,v)){
+                        //cout<<"unchange support!!"<<endl;
+                        break;
+                    }
+                        
+                    // cout<<"do default!!"<<endl;
+                    //default case
+                    if((it->sup+2) > min_k){
+                        // cout<<"real default!!"<<endl;
+                        sup_count++;
+                        graph_adj.compute_edge_support(effect_edge[i].s,effect_edge[i].t);
+                    }
+                    // cout<<"no default!!"<<endl;   
+                
+                
+                } 
+            }
+                // if(it->vertex==effect_edge[i].t && it->sup>min_k)
+                //     graph_adj.compute_edge_support(effect_edge[i].s,effect_edge[i].t);
+    }
+    //graph_adj.python_draw_graph();
+    min_k++;
+}
+ cout << "sup_count: "<<sup_count<<" times"<<endl;
+return;
+
+}
+
+
+Graph TOPr_graph(Graph G_input,int top_r){
+        int min_sup_input=INT32_MAX;
     int min_sup_top=INT32_MAX;
     int min_low=INT32_MAX;
     int max_upper_k=-1;
+    long sup_count=0;
     //G_input.all_low_bound_compute(&min_low);
     cout<<"compute_ALL_support!!"<<endl;
     G_input.compute_ALL_support(&min_sup_input,&sup_count);
@@ -303,8 +453,8 @@ int main(){
 
     //-------------------Top_g element & initial----------------------------------
     Graph graph_adj;//top G
-    graph_adj.adj.resize(node_num);//give node_nums
-    graph_adj.tau=tau;
+    graph_adj.adj.resize(G_input.adj.size());//give node_nums
+    graph_adj.tau=G_input.tau;
     
     bool first=true;
     int k_max=max_upper_k;
@@ -332,18 +482,6 @@ int main(){
                 }
             }
         }
-
-        // cout<<"\n----------------------------------Top_G----------------------------------\n";
-        // graph_adj.printGraph();
-        // graph_adj.compute_ALL_support(&min_sup_top);
-        // cout<<"\n----------------------------------Top_G recompute sup----------------------------------\n";
-        // graph_adj.printGraph();
-
-        // cout<<"\n----------------------------------G_input----------------------------------\n";
-        // G_input.printGraph();
-        // G_input.compute_ALL_support(&min_sup_input);
-        // cout<<"\n----------------------------------G_input recompute sup----------------------------------\n";
-        // G_input.printGraph();
 
         //compute support in TOP_G
         for(auto i = 0; i <graph_adj.adj.size(); i++) {
@@ -405,22 +543,22 @@ int main(){
                                 //delay update
                                 // cout<<"do delay update"<<endl;
                                 if(it->lowerBound_k>k){
-                                    cout<<"real delay update"<<endl;
+                                    //cout<<"real delay update"<<endl;
                                     break;
                                 }
                                 // cout<<"no delay update"<<endl;
 
-                                cout<<"do prunVertex!!"<<endl;
+                                //cout<<"do prunVertex!!"<<endl;
                                 //early prunning
                                 if(G_temp.prunVertex(&graph_adj,effect_edge[i].s , k)|| G_temp.prunVertex(&graph_adj,effect_edge[i].t , k) ){
-                                    cout<<"real prunVertex!!"<<endl;
+                                    //cout<<"real prunVertex!!"<<endl;
                                     break;
                                 }
-                                cout<<"no prunVertex!!"<<endl;
+                                //cout<<"no prunVertex!!"<<endl;
 
                                 //unchange support
                                 if(G_temp.unchange_support(effect_edge[i].s,effect_edge[i].t,u,v)){
-                                    cout<<"unchange support!!"<<endl;
+                                    //cout<<"unchange support!!"<<endl;
                                     break;
                                 }
 
@@ -441,20 +579,100 @@ int main(){
                     }    
                 }
             //}
-            //graph_adj.python_draw_graph();
             k++;
         }
 
     }
+    cout << "sup_count: "<<sup_count<<" times"<<endl;
+    return graph_adj;
+}
+
+
+int main(int argc, char **argv){
+    // ./main dataset tau mode topr
+    // dataset: CH1.txt
+    // tau: 2
+    // mode 0 HOTdecom
+    //      1 HOTD+D
+    //      2 HOTD+DU
+    //      3 HOTD+
+    //      4 TOPr_G
+    // top_r 5(default)
+    if (argc != 5) {
+        std::cout << "Usage Format: " << ".\\main.exe dataset tau mode topr" << std::endl;
+        return 0;
+    }
+    string dataset = argv[1];
+    int tau  = stoi(argv[2]);
+    int mode = stoi(argv[3]);
+    int top_r=5;
+    if(argv[4]){
+        top_r = stoi(argv[4]);
+    }
+    
+
+
+
+    Graph G_input;
+    int node_num =0, edge_num =0;
+    //-------------------input element----------------------------------
+    string filename="./dataset/"+dataset;//graph
+    //int tau=2;
+    //-------------------Top_r input element----------------------------------
+    //int top_r=5;
+
+    //-------------------read file----------------------------------
+    if(!read_file(filename,&node_num,&edge_num,&G_input,tau))
+        return EXIT_FAILURE;
+    
+    
+
+    auto start = chrono::high_resolution_clock::now();
+    cout<<"start!! "<<endl;
+    switch (mode)
+    {
+    case 0:
+        //-------------------HOTdecom----------------------------------
+        HOTdecom(&G_input);
+        break;
+    case 1:
+        HOTdecom_plus_D(&G_input);
+        break;
+    case 2:
+        HOTdecom_plus_DU(&G_input);
+        break;
+    case 3:
+        //-------------------HOTdecom+----------------------------------
+        HOTdecom_plus(&G_input);
+        break;
+    case 4:
+        //-------------------Top_r algorithm----------------------------------
+        G_input=TOPr_graph(G_input,top_r);
+        break;
+    default:
+        cout<<"error mode number!! failed to run :("<<endl;
+        return 0;
+        break;
+    }
+    //-------------------test degree is o?----------------------------------
+    // G_input.printGraph();
+    // for(int i=0;i<G_input.adj.size();i++){
+    //     for(auto it=G_input.adj[i].begin();it!=G_input.adj[i].end();it++){
+    //         if(it->lowerBound_k==INT32_MAX){
+    //             cout<<"wrong"<<endl;
+    //             return 0;
+    //         }
+    //     }
+    // }
+    // cout<<"success!!"<<endl;
+
+
+
+
     //-------------------time recorder end----------------------------------
     auto end = std::chrono::high_resolution_clock::now();
     double duration = std::chrono::duration_cast<std::chrono::duration<double>>(end - start).count();
     cout << "run time: " << duration << " sec\n";
-    cout << "sup_count: "<<sup_count<<" times"<<endl;
     cout<<"algorithm end!!"<<endl;
-    //graph_adj.printGraph();
-    //G_input.python_draw_graph();
-
-
     return 0;
 }
