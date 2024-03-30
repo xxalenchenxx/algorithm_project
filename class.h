@@ -214,6 +214,7 @@ class Graph{
                         for(auto it = G_input->adj[q].begin(); it!= G_input->adj[q].end();it++){
                             if(it->vertex==it_q->vertex){
                                 it->k=min_k;
+                                cout<<"prunvertex e( "<<q<<" , "<<it->vertex<<" )-> k: "<<it->k<<endl;
                                 break;
                             }
                         }

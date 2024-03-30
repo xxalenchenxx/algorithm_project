@@ -316,11 +316,11 @@ int main(){
             }
         }
 
-        cout<<"\n----------------------------------Top_G----------------------------------\n";
-        graph_adj.printGraph();
-        graph_adj.compute_ALL_support(&min_sup_top);
-        cout<<"\n----------------------------------Top_G recompute sup----------------------------------\n";
-        graph_adj.printGraph();
+        // cout<<"\n----------------------------------Top_G----------------------------------\n";
+        // graph_adj.printGraph();
+        // graph_adj.compute_ALL_support(&min_sup_top);
+        // cout<<"\n----------------------------------Top_G recompute sup----------------------------------\n";
+        // graph_adj.printGraph();
 
         // cout<<"\n----------------------------------G_input----------------------------------\n";
         // G_input.printGraph();
@@ -328,8 +328,98 @@ int main(){
         // cout<<"\n----------------------------------G_input recompute sup----------------------------------\n";
         // G_input.printGraph();
 
-    }
+        //compute support in TOP_G
+        for(auto i = 0; i <graph_adj.adj.size(); i++) {
+            for(auto it=graph_adj.adj[i].begin(); it != graph_adj.adj[i].end();it++){
+                if(i<it->vertex){
+                    if(it->k!=-1){
+                        it->sup=it->k-2;
+                        for(auto it1=graph_adj.adj[it->vertex].begin(); it1 != graph_adj.adj[it->vertex].end();it1++){
+                            if(it1->vertex==i){
+                                it1->sup=it->sup;
+                            }
+                        }
+                    }else{
+                        graph_adj.compute_edge_support(i,it->vertex);
+                    }
+                }
+            }
+        }
+        Graph G_temp=graph_adj;
+        while(k<=k_max){
+            //while(check_any_edge(G_temp)){
+                cout<<"-----------min_k: "<<k<<"-----------------"<<endl;
 
+                
+                int u,v;    
+                while(edge_smaller_than_k(G_temp.adj,(k-2),&u,&v)){
+                    vector<EDGE> effect_edge;
+
+                    //put k_truss in edge(u,v)
+                    for(auto it = graph_adj.adj[u].begin(); it != graph_adj.adj[u].end(); it++)
+                        if(it->vertex==v){
+                            it->k=k;
+                            break;
+                        }
+
+                    for(auto it = graph_adj.adj[v].begin(); it != graph_adj.adj[v].end(); it++)
+                        if(it->vertex==u){
+                            it->k=k;
+                            break;
+                        }
+
+
+                    effect_edge=G_temp.effect_edge(u,v);
+                    G_temp.removeEdge(u,v);
+
+                    //cout<<"remove e("<<u<<", "<<v<<")"<<endl;
+                    for(int i=0; i<effect_edge.size(); i++){
+                        for(auto it = G_temp.adj[effect_edge[i].s].begin(); it != G_temp.adj[effect_edge[i].s].end(); it++){
+                            if(it->vertex==effect_edge[i].t){
+                                //delay update
+
+                                // cout<<"do delay update"<<endl;
+                                if(it->lowerBound_k>k){
+                                    cout<<"real delay update"<<endl;
+                                    break;
+                                }
+                                // cout<<"no delay update"<<endl;
+
+                                cout<<"do prunVertex!!"<<endl;
+                                //early prunning
+                                if(G_temp.prunVertex(&graph_adj,effect_edge[i].s , k)|| G_temp.prunVertex(&graph_adj,effect_edge[i].t , k) ){
+                                    cout<<"real prunVertex!!"<<endl;
+                                    break;
+                                }
+                                cout<<"no prunVertex!!"<<endl;
+
+                                //unchange support
+                                if(G_temp.unchange_support(effect_edge[i].s,effect_edge[i].t,u,v)){
+                                    cout<<"unchange support!!"<<endl;
+                                    break;
+                                }
+
+
+
+                                // cout<<"do default!!"<<endl;
+                                //default case
+                                if((it->sup+2) > k){
+                                    // cout<<"real default!!"<<endl;
+                                    G_temp.compute_edge_support(effect_edge[i].s,effect_edge[i].t);
+                                }
+                                // cout<<"no default!!"<<endl;   
+
+
+                            } 
+                        }
+                    }    
+                }
+            //}
+            graph_adj.python_draw_graph();
+            k++;
+        }
+
+    }
     //-------------------time recorder end----------------------------------
     // auto end = std::chrono::high_resolution_clock::now();
     // double duration = std::chrono::duration_cast<std::chrono::duration<double>>(end - start).count();
