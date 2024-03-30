@@ -290,8 +290,8 @@ int main(){
     int k_max=max_upper_k;
     //cout<<"max_upper: "<<max_upper_k<<endl;
     
-    while(check_any_edge_is_kmax(graph_adj,k_max)){
-    //for(unsigned int i=0;i<1;i++){
+    //while(check_any_edge_is_kmax(graph_adj,k_max)){
+    for(unsigned int i=0;i<1;i++){
         
         if(!first){
             if(1){//find k_max(not INT_32MAX) in graph_adj
