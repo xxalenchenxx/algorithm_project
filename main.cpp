@@ -62,7 +62,8 @@ void HOTdecom(Graph *G_input){
 //start HOtdecom
     //compute_ALL_support
     int min_sup=INT32_MAX;
-    G_input->compute_ALL_support(&min_sup);
+    long sup_count=0;
+    G_input->compute_ALL_support(&min_sup,&sup_count);
     //G_input.printGraph();
     Graph graph_adj=*G_input;
 
@@ -215,10 +216,13 @@ return;
 
 //-------------------Top_r function----------------------------------
 bool check_any_edge_is_kmax(Graph G,int k_max){
-    for(int i=0; i<G.adj.size(); i++)
-        for(auto it=G.adj[i].begin(); it!=G.adj[i].end(); it++)
-            if(it->k==k_max)
+    for(int i=0; i<G.adj.size(); i++){
+        for(auto it=G.adj[i].begin(); it!=G.adj[i].end(); it++){
+            if(it->k==k_max){
                 return false; //we find kmax stop while
+            }
+        }
+    }        
     return true; //we haven't found kmax keep finding
 }
 
@@ -238,12 +242,12 @@ void k_max_in_graph(Graph G_input,int *max,int r){
 int main(){
     Graph G_input;
     int node_num =0, edge_num =0;
-
+    long sup_count=0;
     //-------------------input element----------------------------------
     string filename="./dataset/CH1.txt";//graph
     int tau=2;
     //-------------------Top_r input element----------------------------------
-    int top_r=2;
+    int top_r=5;
     //-------------------read file----------------------------------
     if(!read_file(filename,&node_num,&edge_num,&G_input,tau))
         return EXIT_FAILURE;
@@ -289,7 +293,7 @@ int main(){
     int max_upper_k=-1;
     //G_input.all_low_bound_compute(&min_low);
     cout<<"compute_ALL_support!!"<<endl;
-    G_input.compute_ALL_support(&min_sup_input);
+    G_input.compute_ALL_support(&min_sup_input,&sup_count);
     cout<<"all_low_bound_compute!!"<<endl;
     G_input.all_low_bound_compute(&min_low);
     cout<<"all_upper_bound_compute!!"<<endl;
@@ -309,8 +313,9 @@ int main(){
     while(check_any_edge_is_kmax(graph_adj,k_max)){
     //for(unsigned int i=0;i<2;i++){
         
-        if(!first){
+        if(first==false){
             k_max_in_graph(graph_adj,&k_max,top_r);
+            cout<<"k_max: "<<k_max<<endl;
         }
         int k=k_max-top_r+1;
         first=false;
@@ -352,6 +357,7 @@ int main(){
                             }
                         }
                     }else{
+                        sup_count++;
                         graph_adj.compute_edge_support(i,it->vertex);
                     }
                 }
@@ -388,15 +394,15 @@ int main(){
                     for(int i=0; i<effect_edge.size(); i++){
                         for(auto it = G_temp.adj[effect_edge[i].s].begin(); it != G_temp.adj[effect_edge[i].s].end(); it++){
                             if(it->vertex==effect_edge[i].t){
+                                
+
+                                for(auto it = graph_adj.adj[effect_edge[i].s].begin(); it != graph_adj.adj[effect_edge[i].s].end(); it++){
+                                    if(it->vertex==effect_edge[i].t ){
+                                        break;
+                                    }
+                                }
+
                                 //delay update
-
-                                // for(auto it = graph_adj.adj[effect_edge[i].s].begin(); it != graph_adj.adj[effect_edge[i].s].end(); it++){
-                                //     if(it->vertex==effect_edge[i].t && it->k!=-1){
-                                //         break;
-                                //     }
-                                // }
-
-
                                 // cout<<"do delay update"<<endl;
                                 if(it->lowerBound_k>k){
                                     cout<<"real delay update"<<endl;
@@ -424,6 +430,7 @@ int main(){
                                 //default case
                                 if((it->sup+2) > k){
                                     // cout<<"real default!!"<<endl;
+                                    sup_count++;
                                     G_temp.compute_edge_support(effect_edge[i].s,effect_edge[i].t);
                                 }
                                 // cout<<"no default!!"<<endl;   
@@ -442,10 +449,9 @@ int main(){
     //-------------------time recorder end----------------------------------
     auto end = std::chrono::high_resolution_clock::now();
     double duration = std::chrono::duration_cast<std::chrono::duration<double>>(end - start).count();
-    cout << "run time: " << duration << " s\n";
-
+    cout << "run time: " << duration << " sec\n";
+    cout << "sup_count: "<<sup_count<<" times"<<endl;
     cout<<"algorithm end!!"<<endl;
-    
     //graph_adj.printGraph();
     //G_input.python_draw_graph();
 

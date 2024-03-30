@@ -115,10 +115,11 @@ class Graph{
             return;
         }
 
-        void compute_ALL_support(int *small_sup){
+        void compute_ALL_support(int *small_sup,long *sup_count){
             for (int i=0;i< adj.size();i++) {
                     for(auto it = adj[i].begin(); it != adj[i].end(); it++){
                         if(i< it->vertex){
+                            *sup_count++;
                             compute_edge_support(i,it->vertex);
                             if(it->sup<*small_sup)
                                 *small_sup=it->sup;
@@ -212,15 +213,16 @@ class Graph{
                         auto it_q=adj[q].begin();
                         //cout<<"2"<<endl;
                         for(auto it = G_input->adj[q].begin(); it!= G_input->adj[q].end();it++){
-                            if(it->vertex==it_q->vertex){
+                            if(it->vertex==it_q->vertex && it->k==-1){
+                                //cout<<"before prunvertex e( "<<q<<" , "<<it->vertex<<" )-> k: "<<it->k<<endl;
                                 it->k=min_k;
-                                //cout<<"prunvertex e( "<<q<<" , "<<it->vertex<<" )-> k: "<<it->k<<endl;
+                                //cout<<"after prunvertex e( "<<q<<" , "<<it->vertex<<" )-> k: "<<it->k<<endl;
                                 break;
                             }
                         }
                         
                         for(auto it = G_input->adj[it_q->vertex].begin(); it!= G_input->adj[it_q->vertex].end();it++){
-                            if(it->vertex==q){
+                            if(it->vertex==q && it->k==-1){
                                 it->k=min_k;
                                 break;
                             }
