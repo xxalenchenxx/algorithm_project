@@ -214,7 +214,7 @@ class Graph{
                         for(auto it = G_input->adj[q].begin(); it!= G_input->adj[q].end();it++){
                             if(it->vertex==it_q->vertex){
                                 it->k=min_k;
-                                cout<<"prunvertex e( "<<q<<" , "<<it->vertex<<" )-> k: "<<it->k<<endl;
+                                //cout<<"prunvertex e( "<<q<<" , "<<it->vertex<<" )-> k: "<<it->k<<endl;
                                 break;
                             }
                         }
@@ -291,7 +291,7 @@ class Graph{
             int r=0;
             int mid=0;
             int temp_upper_bound=l;
-            set<int> mnn;
+            //set<int> mnn;
             vector<int> Q1, Q2;
             for(auto it=this->adj[u].begin();it!=this->adj[u].end();it++){
                 if(it->vertex==v){
@@ -302,10 +302,10 @@ class Graph{
             Q1=tau_hop_neighbor(u,tau); //u
             Q2=tau_hop_neighbor(v,tau); //v
             //find MNN
-            for(int i=0; i<Q1.size(); i++)
-                for(int j=0; j<Q2.size(); j++)
-                    if(Q1[i]==Q2[j])
-                        mnn.insert(Q1[i]);
+            // for(int i=0; i<Q1.size(); i++)
+            //     for(int j=0; j<Q2.size(); j++)
+            //         if(Q1[i]==Q2[j])
+            //             mnn.insert(Q1[i]);
             
             //binary search more tied upper bound      
             while(l<=r){

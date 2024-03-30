@@ -218,18 +218,29 @@ bool check_any_edge_is_kmax(Graph G,int k_max){
     for(int i=0; i<G.adj.size(); i++)
         for(auto it=G.adj[i].begin(); it!=G.adj[i].end(); it++)
             if(it->k==k_max)
-                return true; 
-    return false;
+                return false; //we find kmax stop while
+    return true; //we haven't found kmax keep finding
 }
 
-
+void k_max_in_graph(Graph G_input,int *max,int r){
+    int MAX=0;
+    for(int i=0; i<G_input.adj.size(); i++){
+        for(auto it=G_input.adj[i].begin(); it!=G_input.adj[i].end();it++){
+            if(i<it->vertex && it->k>MAX){
+                MAX=it->k;
+            }   
+        }
+    }
+    *max=(MAX==0)?(*max-r):(MAX);
+    return;
+}
 
 int main(){
     Graph G_input;
     int node_num =0, edge_num =0;
 
     //-------------------input element----------------------------------
-    string filename="./dataset/test.txt";//graph
+    string filename="./dataset/CH1.txt";//graph
     int tau=2;
     //-------------------Top_r input element----------------------------------
     int top_r=2;
@@ -257,6 +268,8 @@ int main(){
 
     
     auto start = chrono::high_resolution_clock::now();
+    cout<<"start!! "<<endl;
+
     // cout << "Nodes: " << node_num << endl;
     // cout << "Edges: " << edge_num << endl;
 
@@ -275,11 +288,14 @@ int main(){
     int min_low=INT32_MAX;
     int max_upper_k=-1;
     //G_input.all_low_bound_compute(&min_low);
+    cout<<"compute_ALL_support!!"<<endl;
     G_input.compute_ALL_support(&min_sup_input);
+    cout<<"all_low_bound_compute!!"<<endl;
     G_input.all_low_bound_compute(&min_low);
+    cout<<"all_upper_bound_compute!!"<<endl;
     G_input.all_upper_bound_compute(&max_upper_k);
-    cout<<"----------------------------------input graph----------------------------------\n";
-    G_input.printGraph();
+    // cout<<"----------------------------------input graph----------------------------------\n";
+    // G_input.printGraph();
 
     //-------------------Top_g element & initial----------------------------------
     Graph graph_adj;//top G
@@ -288,17 +304,13 @@ int main(){
     
     bool first=true;
     int k_max=max_upper_k;
-    //cout<<"max_upper: "<<max_upper_k<<endl;
+    cout<<"max_upper: "<<max_upper_k<<endl;
     
-    //while(check_any_edge_is_kmax(graph_adj,k_max)){
-    for(unsigned int i=0;i<1;i++){
+    while(check_any_edge_is_kmax(graph_adj,k_max)){
+    //for(unsigned int i=0;i<2;i++){
         
         if(!first){
-            if(1){//find k_max(not INT_32MAX) in graph_adj
-                //code here
-            }else{
-                k_max-=top_r;
-            }
+            k_max_in_graph(graph_adj,&k_max,top_r);
         }
         int k=k_max-top_r+1;
         first=false;
@@ -378,6 +390,13 @@ int main(){
                             if(it->vertex==effect_edge[i].t){
                                 //delay update
 
+                                // for(auto it = graph_adj.adj[effect_edge[i].s].begin(); it != graph_adj.adj[effect_edge[i].s].end(); it++){
+                                //     if(it->vertex==effect_edge[i].t && it->k!=-1){
+                                //         break;
+                                //     }
+                                // }
+
+
                                 // cout<<"do delay update"<<endl;
                                 if(it->lowerBound_k>k){
                                     cout<<"real delay update"<<endl;
@@ -415,17 +434,17 @@ int main(){
                     }    
                 }
             //}
-            graph_adj.python_draw_graph();
+            //graph_adj.python_draw_graph();
             k++;
         }
 
     }
     //-------------------time recorder end----------------------------------
-    // auto end = std::chrono::high_resolution_clock::now();
-    // double duration = std::chrono::duration_cast<std::chrono::duration<double>>(end - start).count();
-    // cout << "run time: " << duration << " s\n";
+    auto end = std::chrono::high_resolution_clock::now();
+    double duration = std::chrono::duration_cast<std::chrono::duration<double>>(end - start).count();
+    cout << "run time: " << duration << " s\n";
 
-    //cout<<"algorithm end!!"<<endl;
+    cout<<"algorithm end!!"<<endl;
     
     //graph_adj.printGraph();
     //G_input.python_draw_graph();
