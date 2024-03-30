@@ -7,12 +7,12 @@
 using namespace std;
 
 int main(){
-    string in[5]={"t","LJ","dblp","orkut","twitter"};
-    string out[5]={"t1","LJ1","dblp1","orkut1","twitter1"};
+    string in[3]={"LJ","dblp","orkut"};
+    string out[3]={"LJ","dblp","orkut"};
     
-    for(int i=0; i<1; i++){
+    for(int i=0; i<3; i++){
         ifstream myfile;
-        myfile.open("./datat/"+in[i]+".txt");
+        myfile.open("../dataset/"+in[i]+".txt");
         string str;
         
         if(!myfile.is_open()){
@@ -22,7 +22,7 @@ int main(){
             
         
         // Read and write the first two lines
-        ofstream outfile("./datat/"+out[i]+".txt");
+        ofstream outfile("../dataset/d/"+out[i]+".txt");
 
         // Construct the node map
         while(getline(myfile, str)){

@@ -7,12 +7,14 @@
 using namespace std;
 
 int main(){
-    string in[4]={"CG","CA","CH","FB"};
-    string out[4]={"CG1","CA1","CH1","FB1"};
-    
-    for(int i=0; i<4; i++){
+    // string in[4]={"CG","CA","CH","FB"};
+    // string out[4]={"CG1","CA1","CH1","FB1"};
+    string in[3]={"dblp","LJ","amazon"};
+    string out[3]={"dblp1","LJ1","amazon1"};
+    int i=0;
+    //for(int i=0; i<4; i++){
         ifstream myfile;
-        myfile.open("./dataset/"+in[i]+".txt");
+        myfile.open("../dataset/d/"+in[i]+".txt");
         string str;
 
         unordered_map<int, int> node_map;
@@ -20,7 +22,7 @@ int main(){
         unordered_set<string> edge_set;
 
         // Read and write the first two lines
-        ofstream outfile("./dataset/"+out[i]+".txt");
+        ofstream outfile("../dataset/d/"+out[i]+".txt");
         getline(myfile, str);
         outfile << str << endl;
         getline(myfile, str);
@@ -77,6 +79,6 @@ int main(){
         }
         myfile.close();
         outfile.close();
-    }
+    //}
 return 0;
 }

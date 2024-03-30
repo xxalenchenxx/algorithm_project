@@ -10,22 +10,27 @@ with open(file_name, 'r') as file:
 degree = []
 number = []
 
+is_first_line = True
 for line in lines:
-    edge = line.split()
-    degree.append(int(edge[0]))
-    number.append(int(edge[1]))
+    if is_first_line:
+        title = line
+        is_first_line = False
+    else:
+        edge = line.split()
+        degree.append(int(edge[0]))
+        number.append(int(edge[1]))
 
 # 獲取最小和最大的 degree 值
 min_degree = min(degree)
 max_degree = max(degree)
-one_degree_percent = (degree[0]+degree[1]+degree[2])/sum(number)
+one_degree_percent = (number[0]+number[1])/sum(number)*100
 # 繪製直方圖
-print(one_degree_percent)
+print(f"{one_degree_percent} %")
 plt.bar(degree, number)
 plt.xlabel('Degree')
 plt.ylabel('Number')
-plt.title('Degree Distribution')
+plt.title(title)
 
 # 設定橫軸範圍
-plt.xlim(min_degree, 200)
+plt.xlim(min_degree, 100)
 plt.show()
