@@ -1,6 +1,6 @@
 #include"class.h"
 #include <chrono>
-
+#include <cmath>
 bool check_any_edge(Graph G){
     for(int i=0; i<G.adj.size(); i++)
         if(G.adj[i].size())
@@ -674,5 +674,19 @@ int main(int argc, char **argv){
     double duration = std::chrono::duration_cast<std::chrono::duration<double>>(end - start).count();
     cout << "run time: " << duration << " sec\n";
     cout<<"algorithm end!!"<<endl;
+    
+    //compute AE
+    double sum_delta=0.0;
+    double m=0.0;
+    for(auto i = 0; i <G_input.adj.size(); i++) {
+        for(auto it=G_input.adj[i].begin(); it != G_input.adj[i].end();it++){
+            if(i<it->vertex){
+                sum_delta+=(double)(it->k-it->lowerBound_k)/it->k; ///it->k
+                m++;
+            }
+        }
+    }
+    sum_delta/=m;
+    cout << "total sum_delta: " << sum_delta << "\n";
     return 0;
 }
