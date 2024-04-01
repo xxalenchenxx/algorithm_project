@@ -191,7 +191,7 @@ class Graph{
             return;
         }
 
-        bool prunVertex(Graph *G_input,int v, int min_k){
+        bool prunVertex(Graph *G_input,int v, int min_k,long *sup_count){
             vector<int> V;
             queue<int> Q2; //BFS
             V=tau_hop_neighbor(v,tau);
@@ -213,7 +213,7 @@ class Graph{
                         auto it_q=adj[q].begin();
                         //cout<<"2"<<endl;
                         for(auto it = G_input->adj[q].begin(); it!= G_input->adj[q].end();it++){
-                            if(it->vertex==it_q->vertex && it->k==-1){
+                            if(it->vertex==it_q->vertex ){ //&& it->k==-1
                                 //cout<<"before prunvertex e( "<<q<<" , "<<it->vertex<<" )-> k: "<<it->k<<endl;
                                 it->k=min_k;
                                 //cout<<"after prunvertex e( "<<q<<" , "<<it->vertex<<" )-> k: "<<it->k<<endl;
@@ -222,7 +222,7 @@ class Graph{
                         }
                         
                         for(auto it = G_input->adj[it_q->vertex].begin(); it!= G_input->adj[it_q->vertex].end();it++){
-                            if(it->vertex==q && it->k==-1){
+                            if(it->vertex==q ){ //&& it->k==-1
                                 it->k=min_k;
                                 break;
                             }
@@ -249,15 +249,19 @@ class Graph{
                     
                 
                     //test ?
-                    for(int i=0;i<remain.size();i++){
-                        for(int j=0;j<remain.size();j++){
-                            if(remain[i]<remain[j]){
-                                for(auto it=adj[remain[i]].begin();it!=adj[remain[i]].end();it++)
-                                    if(it->lowerBound_k<=min_k)
-                                        compute_edge_support(remain[i],it->vertex);
-                            }
-                        }
-                    }
+                    // for(int i=0;i<remain.size();i++){
+                    //     for(int j=0;j<remain.size();j++){
+                    //         if(remain[i]<remain[j]){
+                    //             for(auto it=adj[remain[i]].begin();it!=adj[remain[i]].end();it++){
+                    //                 if(it->lowerBound_k<=min_k){
+                    //                     (*sup_count)++;
+                    //                     compute_edge_support(remain[i],it->vertex);
+                    //                 }
+                    //             }
+                                    
+                    //         }
+                    //     }
+                    // }
 
                 }
                 
@@ -440,7 +444,7 @@ class Graph{
                 // for(auto i=S1.begin(); i!=S1.end(); i++)
                 //     cout<<*i<<" ";
 
-                cout<<endl;
+                //cout<<endl;
                 max_low=max(max_low, int(S1.size()) );
             }
             

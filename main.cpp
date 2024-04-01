@@ -188,7 +188,7 @@ while(check_any_edge(graph_adj)){
 
                     //cout<<"do prunVertex!!"<<endl;
                     //early prunning
-                    if(graph_adj.prunVertex(G_input,effect_edge[i].s , min_k)|| graph_adj.prunVertex(G_input,effect_edge[i].t , min_k) ){
+                    if(graph_adj.prunVertex(G_input,effect_edge[i].s , min_k,&sup_count)|| graph_adj.prunVertex(G_input,effect_edge[i].t , min_k,&sup_count) ){
                         //cout<<"real prunVertex!!"<<endl;
                         break;
                     }
@@ -550,7 +550,7 @@ Graph TOPr_graph(Graph G_input,int top_r){
 
                                 //cout<<"do prunVertex!!"<<endl;
                                 //early prunning
-                                if(G_temp.prunVertex(&graph_adj,effect_edge[i].s , k)|| G_temp.prunVertex(&graph_adj,effect_edge[i].t , k) ){
+                                if(G_temp.prunVertex(&graph_adj,effect_edge[i].s , k,&sup_count)|| G_temp.prunVertex(&graph_adj,effect_edge[i].t , k,&sup_count) ){
                                     //cout<<"real prunVertex!!"<<endl;
                                     break;
                                 }

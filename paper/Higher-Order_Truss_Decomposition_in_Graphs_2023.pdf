@@ -23954,3 +23954,64 @@ trailer
 startxref
 2635830
 %%EOF
+30 0 obj
+<</Annots[ 209 0 R 210 0 R 211 0 R 212 0 R 213 0 R 214 0 R 215 0 R 216 0 R 217 0 R 595 0 R 596 0 R]/Contents[ 218 0 R 219 0 R 220 0 R]/CropBox[ 0 0 564.831 771.08]/MediaBox[ 0 0 564.831 771.08]/Parent 14 0 R/Resources<</ColorSpace<</Cs6[/ICCBased 62 0 R]>>/ExtGState<</GS1 63 0 R/GS4 106 0 R/GS5 65 0 R/GS7 64 0 R/GS11 90 0 R>>/Font<</F1 66 0 R/F3 68 0 R/F4 69 0 R/F5 70 0 R/F7 72 0 R/F8 73 0 R/F9 74 0 R/F10 77 0 R/F14 155 0 R>>/ProcSet[/PDF/Text/ImageB/ImageC/ImageI]/Properties<</MC9 221 0 R/MC10 222 0 R>>/XObject<</Im1 223 0 R/Im2 224 0 R>>>>/Rotate 0/Thumb 225 0 R/Type/Page>>
+endobj
+595 0 obj
+<</Type/Annot/Subtype/Highlight/P 30 0 R/F 4/M(D:20240401075118Z00'00)/Rect[ 26.1921 625.36944 35.898498 634.53517]/C[ .921569 .286275 .286275]/Popup 596 0 R/CA 1/CreationDate(D:20240401075118Z00'00)/QuadPoints[ 26.1921 634.53517 35.898498 634.53517 26.1921 625.36944 35.898498 625.36944]/AP<</N 603 0 R>>>>
+endobj
+596 0 obj
+<</Type/Annot/Subtype/Popup/Open false/F 28/Rect[ 612 514.53517 792 634.53517]/Parent 595 0 R>>
+endobj
+601 0 obj
+<</Length 123/Type/XObject/Subtype/Form/FormType 1/BBox[ 26.1921 625.36944 35.898498 634.53517]/Matrix[ 1 0 0 1 -26.1921 -625.36944]/Resources<</ProcSet[/PDF]>>>>
+stream
+.921569 .286275 .286275 rg
+.572858 w
+26.1921 625.36944 m
+26.1921 634.53517 l
+35.898498 634.53517 l
+35.898498 625.36944 l
+f
+
+endstream
+endobj
+602 0 obj
+<</Length 9/Type/XObject/Subtype/Form/FormType 1/BBox[ 0 0 9.706398 9.16573]/Matrix[ 1 0 0 1 0 0]/Resources<</ProcSet[/PDF]/XObject<</Form 601 0 R>>>>/Group<</S/Transparency>>>>
+stream
+/Form Do
+
+endstream
+endobj
+603 0 obj
+<</Length 20/Type/XObject/Subtype/Form/FormType 1/BBox[ 0 0 9.706398 9.16573]/Matrix[ 1 0 0 1 0 0]/Resources<</ProcSet[/PDF]/XObject<</MWFOForm 602 0 R>>/ExtGState<</R0 604 0 R>>>>>>
+stream
+/R0 gs
+/MWFOForm Do
+
+endstream
+endobj
+604 0 obj
+<</Type/ExtGState/AIS false/BM/Multiply>>
+endobj
+1 0 obj
+<</CreationDate(D:20230210191617+05'30')/Creator(Arbortext Advanced Print Publisher 10.0.1062/W Unicode)/ModDate(D:20240401075401Z00'00)/Producer<4163726F6261742044697374696C6C65722031312E30202857696E646F7773293B206D6F646966696564207573696E67206954657874AE20372E312E3120A9323030302D323031382069546578742047726F7570204E5620284147504C2D76657273696F6E29>/Subject(IEEE Transactions on Knowledge and Data Engineering;2023;35;4;10.1109/TKDE.2021.3137955)/Title(Higher-Order Truss Decomposition in Graphs)/IEEE#20Issue#20ID(10063074)/IEEE#20Article#20ID(9662190)/IEEE#20Publication#20ID(69)>>
+endobj
+xref
+1 1
+0002649769 00000 n
+30 1
+0002647889 00000 n
+595 2
+0002648488 00000 n
+0002648813 00000 n
+601 4
+0002648926 00000 n
+0002649248 00000 n
+0002649471 00000 n
+0002649710 00000 n
+trailer
+<</ID[<6AE0B55E664AFFC7D3677F471797545F><685C0235F101E8F37787D5CAD2A130D5>]/Info 1 0 R/Root 2 0 R/Size 605/Prev 2635830>>
+startxref
+2650370
+%%EOF
